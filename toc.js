@@ -53,11 +53,18 @@
     var mastTitle = document.createElement("p");
     mastTitle.className = "paper-sidebar__title";
     mastTitle.textContent = paperTitle;
+    var mastMetaRow = document.createElement("div");
+    mastMetaRow.className = "paper-sidebar__meta-row";
     var mastMeta = document.createElement("p");
     mastMeta.className = "paper-sidebar__meta";
     mastMeta.textContent = readMinutes + " min read";
+    var mastCurrent = document.createElement("p");
+    mastCurrent.className = "paper-sidebar__current";
+    mastCurrent.textContent = "Overview";
     mast.appendChild(mastTitle);
-    mast.appendChild(mastMeta);
+    mastMetaRow.appendChild(mastMeta);
+    mastMetaRow.appendChild(mastCurrent);
+    mast.appendChild(mastMetaRow);
 
     var label = document.createElement("p");
     label.className = "paper-sidebar__label";
@@ -65,9 +72,15 @@
 
     var desktopList = document.createElement("ol");
     desktopList.className = "paper-sidebar__list";
+    var progress = document.createElement("div");
+    progress.className = "paper-sidebar__progress";
+    var progressBar = document.createElement("span");
+    progressBar.className = "paper-sidebar__progress-bar";
+    progress.appendChild(progressBar);
 
     nav.appendChild(mast);
     nav.appendChild(label);
+    nav.appendChild(progress);
     nav.appendChild(desktopList);
     sidebar.appendChild(nav);
 
@@ -161,6 +174,7 @@
         current.mobileLink.setAttribute("aria-current", "location");
       }
 
+      mastCurrent.textContent = current.title;
       if (jumpCurrent) jumpCurrent.textContent = current.title;
     }
 
@@ -215,12 +229,29 @@
       return picked;
     }
 
+    function updateProgress() {
+      var contentNodes = Array.from(contentWrap.children).filter(function (node) {
+        return !node.classList.contains("paper-toc-jump");
+      });
+      var firstNode = contentNodes[0];
+      var lastNode = contentNodes[contentNodes.length - 1];
+      if (!firstNode || !lastNode) return;
+
+      var start = firstNode.getBoundingClientRect().top + window.scrollY;
+      var end = lastNode.getBoundingClientRect().bottom + window.scrollY - window.innerHeight * 0.65;
+      var total = Math.max(1, end - start);
+      var raw = (window.scrollY - start) / total;
+      var progressValue = Math.max(0, Math.min(1, raw));
+      progressBar.style.setProperty("--toc-progress", progressValue.toFixed(4));
+    }
+
     var stateRaf = 0;
     function scheduleStateSync() {
       if (stateRaf) return;
       stateRaf = window.requestAnimationFrame(function () {
         stateRaf = 0;
         setActive(pickActiveHeadingId());
+        updateProgress();
       });
     }
 
@@ -231,6 +262,7 @@
         recalcRaf = 0;
         recalcRowWeights();
         scheduleStateSync();
+        updateProgress();
       });
     }
 
@@ -298,6 +330,7 @@
 
     recalcRowWeights();
     scheduleStateSync();
+    updateProgress();
   }
 
   if (document.readyState === "loading") {
