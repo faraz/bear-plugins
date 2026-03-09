@@ -34,17 +34,25 @@
     wordmark.appendChild(textSpan);
     wordmark.appendChild(decodeSpan);
 
-    var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var lower = "abcdefghijklmnopqrstuvwxyz";
+    var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var numeric = "0123456789";
     var symbols = "!<>-_\\/[]{}=+*^?#";
-    var glyphs = (letters + symbols).split("");
 
     var frame = null;
     var cooldownUntil = 0;
     var tickMs = 30;
     var iterationStep = 1 / 3;
 
-    function randomGlyph() {
-      return glyphs[Math.floor(Math.random() * glyphs.length)];
+    function fromPool(pool) {
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function randomGlyphForChar(ch) {
+      if (/[a-z]/.test(ch)) return fromPool(lower);
+      if (/[A-Z]/.test(ch)) return fromPool(upper);
+      if (/[0-9]/.test(ch)) return fromPool(numeric);
+      return fromPool(symbols);
     }
 
     function render(step) {
@@ -55,7 +63,7 @@
           output += " ";
           continue;
         }
-        output += i < step ? ch : randomGlyph();
+        output += i < step ? ch : randomGlyphForChar(ch);
       }
       decodeSpan.textContent = output;
     }
