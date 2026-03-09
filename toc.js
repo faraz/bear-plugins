@@ -9,7 +9,7 @@
     if (!body || !body.classList.contains("paper")) return;
 
     var main = document.querySelector("main");
-    if (!main || main.querySelector(".paper-sidebar")) return;
+    if (!main || document.querySelector(".paper-sidebar") || main.querySelector(".paper-toc-jump")) return;
 
     var headings = Array.from(main.querySelectorAll("h2[id]")).filter(function (el) {
       return el.id && el.textContent && el.textContent.trim().length > 0;
@@ -27,86 +27,127 @@
     label.className = "paper-sidebar__label";
     label.textContent = "On this page";
 
-    var list = document.createElement("ol");
-    list.className = "paper-sidebar__list";
+    var desktopList = document.createElement("ol");
+    desktopList.className = "paper-sidebar__list";
 
     nav.appendChild(label);
-    nav.appendChild(list);
+    nav.appendChild(desktopList);
     sidebar.appendChild(nav);
 
-    main.insertBefore(sidebar, main.firstChild);
+    var jump = document.createElement("details");
+    jump.className = "paper-toc-jump";
+
+    var jumpSummary = document.createElement("summary");
+    jumpSummary.className = "paper-toc-jump__summary";
+    jumpSummary.innerHTML =
+      '<span class="paper-toc-jump__label">On this page</span><span class="paper-toc-jump__current"></span>';
+
+    var jumpList = document.createElement("ol");
+    jumpList.className = "paper-toc-jump__list";
+
+    jump.appendChild(jumpSummary);
+    jump.appendChild(jumpList);
+
+    main.parentNode.insertBefore(sidebar, main);
+    main.insertBefore(jump, main.firstChild);
     body.classList.add("paper-toc-enhanced");
 
+    var jumpCurrent = jumpSummary.querySelector(".paper-toc-jump__current");
     var entries = new Map();
 
     headings.forEach(function (heading) {
-      var item = document.createElement("li");
-      item.className = "paper-sidebar__item";
+      var id = heading.id;
+      var title = heading.textContent.trim();
 
-      var link = document.createElement("a");
-      link.className = "paper-sidebar__link";
-      link.href = "#" + heading.id;
-      link.textContent = heading.textContent.trim();
+      var desktopItem = document.createElement("li");
+      desktopItem.className = "paper-sidebar__item";
+      var desktopLink = document.createElement("a");
+      desktopLink.className = "paper-sidebar__link";
+      desktopLink.href = "#" + id;
+      desktopLink.textContent = title;
+      desktopItem.appendChild(desktopLink);
+      desktopList.appendChild(desktopItem);
 
-      item.appendChild(link);
-      list.appendChild(item);
+      var mobileItem = document.createElement("li");
+      mobileItem.className = "paper-toc-jump__item";
+      var mobileLink = document.createElement("a");
+      mobileLink.className = "paper-sidebar__link paper-toc-jump__link";
+      mobileLink.href = "#" + id;
+      mobileLink.textContent = title;
+      mobileItem.appendChild(mobileLink);
+      jumpList.appendChild(mobileItem);
 
-      entries.set(heading.id, { item: item, link: link });
+      entries.set(id, {
+        title: title,
+        desktopItem: desktopItem,
+        desktopLink: desktopLink,
+        mobileItem: mobileItem,
+        mobileLink: mobileLink
+      });
     });
 
     var activeId = null;
     function setActive(id) {
-      if (!id || id === activeId || !entries.has(id)) return;
+      if (!id || !entries.has(id) || id === activeId) return;
       activeId = id;
+      var desktopMode = window.matchMedia && window.matchMedia("(min-width: 1180px)").matches;
 
-      entries.forEach(function (pair) {
-        pair.item.classList.remove("is-active");
-        pair.link.classList.remove("is-active");
-        pair.link.removeAttribute("aria-current");
+      entries.forEach(function (entry) {
+        entry.desktopItem.classList.remove("is-active");
+        entry.desktopLink.classList.remove("is-active");
+        entry.desktopLink.removeAttribute("aria-current");
+        entry.mobileItem.classList.remove("is-active");
+        entry.mobileLink.classList.remove("is-active");
+        entry.mobileLink.removeAttribute("aria-current");
       });
 
       var current = entries.get(id);
-      current.item.classList.add("is-active");
-      current.link.classList.add("is-active");
-      current.link.setAttribute("aria-current", "location");
+      current.desktopItem.classList.add("is-active");
+      current.desktopLink.classList.add("is-active");
+      current.mobileItem.classList.add("is-active");
+      current.mobileLink.classList.add("is-active");
+      if (desktopMode) {
+        current.desktopLink.setAttribute("aria-current", "location");
+      } else {
+        current.mobileLink.setAttribute("aria-current", "location");
+      }
+
+      if (jumpCurrent) jumpCurrent.textContent = current.title;
     }
 
     function recalcRowWeights() {
       if (headings.length < 2) {
-        entries.forEach(function (pair) {
-          pair.item.style.setProperty("--toc-grow", "1");
+        entries.forEach(function (entry) {
+          entry.desktopItem.style.setProperty("--toc-grow", "1");
         });
         return;
       }
 
       var headingTops = headings.map(function (heading) {
-        var rect = heading.getBoundingClientRect();
-        return rect.top + window.scrollY;
+        return heading.getBoundingClientRect().top + window.scrollY;
       });
 
       var mainRect = main.getBoundingClientRect();
       var mainBottom = mainRect.top + window.scrollY + main.scrollHeight;
-
       var spans = headingTops.map(function (top, index) {
         var nextTop = headingTops[index + 1] || mainBottom;
-        return Math.max(1, nextTop - top);
+        return Math.max(8, nextTop - top);
       });
 
-      var avgSpan =
-        spans.reduce(function (sum, value) {
-          return sum + value;
-        }, 0) / spans.length;
+      var minSpan = Math.min.apply(Math, spans);
+      var maxSpan = Math.max.apply(Math, spans);
+      var spanRange = Math.max(1, maxSpan - minSpan);
 
       headings.forEach(function (heading, index) {
-        var span = spans[index];
-        var grow = span / Math.max(1, avgSpan);
-        var clamped = Math.max(0.72, Math.min(5.8, grow));
-        entries.get(heading.id).item.style.setProperty("--toc-grow", clamped.toFixed(3));
+        var normalized = (spans[index] - minSpan) / spanRange;
+        var eased = Math.log1p(normalized * 3) / Math.log(4);
+        var grow = 0.92 + eased * 1.04;
+        entries.get(heading.id).desktopItem.style.setProperty("--toc-grow", grow.toFixed(3));
       });
     }
 
     function pickActiveHeadingId() {
-      var threshold = window.innerHeight * 0.22;
+      var threshold = Math.min(window.innerHeight * 0.26, 220);
       var picked = headings[0].id;
 
       for (var i = 0; i < headings.length; i += 1) {
@@ -129,11 +170,11 @@
       });
     }
 
-    var resizeRaf = 0;
+    var recalcRaf = 0;
     function scheduleRecalc() {
-      if (resizeRaf) return;
-      resizeRaf = window.requestAnimationFrame(function () {
-        resizeRaf = 0;
+      if (recalcRaf) return;
+      recalcRaf = window.requestAnimationFrame(function () {
+        recalcRaf = 0;
         recalcRowWeights();
         scheduleStateSync();
       });
@@ -146,8 +187,8 @@
         },
         {
           root: null,
-          rootMargin: "-18% 0px -72% 0px",
-          threshold: [0, 1]
+          rootMargin: "-20% 0px -68% 0px",
+          threshold: [0, 0.25, 1]
         }
       );
 
@@ -158,8 +199,8 @@
 
     var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    nav.addEventListener("click", function (event) {
-      var link = event.target.closest(".paper-sidebar__link");
+    function handleLinkClick(event) {
+      var link = event.target.closest('a[href^="#"]');
       if (!link) return;
 
       var hash = link.getAttribute("href");
@@ -174,9 +215,16 @@
         history.replaceState(null, "", hash);
       }
 
+      if (jump.open && jump.contains(link)) {
+        jump.open = false;
+      }
+
       setActive(heading.id);
       scheduleStateSync();
-    });
+    }
+
+    nav.addEventListener("click", handleLinkClick);
+    jumpList.addEventListener("click", handleLinkClick);
 
     window.addEventListener("scroll", scheduleStateSync, { passive: true });
     window.addEventListener("resize", scheduleRecalc, { passive: true });
@@ -188,6 +236,11 @@
       },
       { once: true }
     );
+
+    if (window.location.hash) {
+      var hashId = decodeURIComponent(window.location.hash.slice(1));
+      if (entries.has(hashId)) setActive(hashId);
+    }
 
     recalcRowWeights();
     scheduleStateSync();
