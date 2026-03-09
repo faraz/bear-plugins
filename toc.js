@@ -4,12 +4,27 @@
 (function () {
   "use strict";
 
+  function directChildByClass(parent, className) {
+    return Array.from(parent.children).find(function (node) {
+      return node.classList && node.classList.contains(className);
+    });
+  }
+
   function initPaperSidebarToc() {
     var body = document.body;
     if (!body || !body.classList.contains("paper")) return;
 
     var main = document.querySelector("main");
-    if (!main || main.querySelector(".paper-sidebar") || main.querySelector(".paper-toc-jump")) return;
+    if (!main) return;
+
+    var existingSidebar = directChildByClass(main, "paper-sidebar");
+    var existingContentWrap = directChildByClass(main, "paper-content");
+    var existingJumpTop = directChildByClass(main, "paper-toc-jump");
+    var existingJumpInWrap = existingContentWrap
+      ? directChildByClass(existingContentWrap, "paper-toc-jump")
+      : null;
+    var isAlreadyEnhanced = existingSidebar && existingContentWrap && (existingJumpTop || existingJumpInWrap);
+    if (isAlreadyEnhanced) return;
 
     var headings = Array.from(main.querySelectorAll("h2[id]")).filter(function (el) {
       return el.id && el.textContent && el.textContent.trim().length > 0;
@@ -70,8 +85,19 @@
     jump.appendChild(jumpSummary);
     jump.appendChild(jumpList);
 
-    main.insertBefore(sidebar, main.firstChild);
-    main.insertBefore(jump, sidebar.nextSibling);
+    if (existingSidebar) existingSidebar.remove();
+    if (existingJumpTop) existingJumpTop.remove();
+    if (existingJumpInWrap) existingJumpInWrap.remove();
+
+    var contentWrap = document.createElement("div");
+    contentWrap.className = "paper-content";
+    while (main.firstChild) {
+      contentWrap.appendChild(main.firstChild);
+    }
+
+    main.appendChild(sidebar);
+    main.appendChild(contentWrap);
+    contentWrap.insertBefore(jump, contentWrap.firstChild);
     body.classList.add("paper-toc-enhanced");
 
     var jumpCurrent = jumpSummary.querySelector(".paper-toc-jump__current");
@@ -146,13 +172,13 @@
         return;
       }
 
-      var contentNodes = Array.from(main.children).filter(function (node) {
-        return !node.classList.contains("paper-sidebar") && !node.classList.contains("paper-toc-jump");
+      var contentNodes = Array.from(contentWrap.children).filter(function (node) {
+        return !node.classList.contains("paper-toc-jump");
       });
       var lastContentNode = contentNodes[contentNodes.length - 1];
       var contentBottom = lastContentNode
         ? lastContentNode.getBoundingClientRect().top + window.scrollY + lastContentNode.offsetHeight
-        : main.getBoundingClientRect().top + window.scrollY + main.offsetHeight;
+        : contentWrap.getBoundingClientRect().top + window.scrollY + contentWrap.offsetHeight;
 
       var headingTops = headings.map(function (heading) {
         return heading.getBoundingClientRect().top + window.scrollY;
