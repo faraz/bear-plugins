@@ -34,25 +34,22 @@
     wordmark.appendChild(textSpan);
     wordmark.appendChild(decodeSpan);
 
-    var lower = "abcdefghijklmnopqrstuvwxyz";
-    var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var numeric = "0123456789";
-    var symbols = "!<>-_\\/[]{}=+*^?#";
+    var symbols = "!<>-_\\/[]{}=+*^?#$%&~|:";
+    var soft = "abcdefghijklmnopqrstuvwxyz0123456789";
 
     var frame = null;
     var cooldownUntil = 0;
     var tickMs = 30;
     var iterationStep = 1 / 3;
+    var symbolBias = 0.9;
 
     function fromPool(pool) {
-      return pool[Math.floor(Math.random() * pool.length)];
+      return pool.charAt(Math.floor(Math.random() * pool.length));
     }
 
-    function randomGlyphForChar(ch) {
-      if (/[a-z]/.test(ch)) return fromPool(lower);
-      if (/[A-Z]/.test(ch)) return fromPool(upper);
-      if (/[0-9]/.test(ch)) return fromPool(numeric);
-      return fromPool(symbols);
+    // Bias heavily toward symbols to match the reference decode style.
+    function randomGlyph() {
+      return Math.random() < symbolBias ? fromPool(symbols) : fromPool(soft);
     }
 
     function render(step) {
@@ -63,7 +60,7 @@
           output += " ";
           continue;
         }
-        output += i < step ? ch : randomGlyphForChar(ch);
+        output += i < step ? ch : randomGlyph();
       }
       decodeSpan.textContent = output;
     }
