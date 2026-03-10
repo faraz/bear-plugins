@@ -1,10 +1,17 @@
 /* Bear
    Home wordmark decode effect
-   Tuned fast decode version
    Inspired by: https://codepen.io/creativeocean/pen/JjemXGY */
 
 (function () {
   "use strict";
+
+  function safeNumber(value, fallback, min, max) {
+    var n = Number(value);
+    if (!Number.isFinite(n)) return fallback;
+    if (typeof min === "number" && n < min) return min;
+    if (typeof max === "number" && n > max) return max;
+    return n;
+  }
 
   function initWordmarkDecode() {
     var body = document.body;
@@ -15,7 +22,6 @@
       document.querySelector("header .title h1") ||
       document.querySelector("header .brand-wordmark") ||
       document.querySelector("header h1");
-
     if (!wordmark) return;
 
     var text = (wordmark.textContent || "").replace(/\s+/g, " ").trim();
@@ -42,40 +48,32 @@
     var frame = null;
     var cooldownUntil = 0;
 
-    /* --- tuned parameters --- */
-
-    var tickMs = 14;            // faster frame updates
-    var iterationStep = 0.9;    // reveal letters quickly
-    var symbolBias = 0.93;      // heavy symbol preference
-
-    /* ------------------------ */
+    // Faster default profile (safe + readable).
+    var tickMs = safeNumber(22, 22, 10, 120);
+    var iterationStep = safeNumber(0.62, 0.62, 0.05, 3);
+    var symbolBias = safeNumber(0.9, 0.9, 0, 1);
+    var initialDelayMs = safeNumber(80, 80, 0, 1000);
+    var cooldownMs = safeNumber(850, 850, 100, 4000);
 
     function fromPool(pool) {
       return pool.charAt(Math.floor(Math.random() * pool.length));
     }
 
+    // Bias heavily toward symbols to match the reference decode style.
     function randomGlyph() {
       return Math.random() < symbolBias ? fromPool(symbols) : fromPool(soft);
     }
 
     function render(step) {
       var output = "";
-
-      for (var i = 0; i < text.length; i++) {
+      for (var i = 0; i < text.length; i += 1) {
         var ch = text[i];
-
         if (ch === " ") {
           output += " ";
           continue;
         }
-
-        if (i < step) {
-          output += ch;
-        } else {
-          output += randomGlyph();
-        }
+        output += i < step ? ch : randomGlyph();
       }
-
       decodeSpan.textContent = output;
     }
 
@@ -84,7 +82,6 @@
       if (frame || now < cooldownUntil) return;
 
       body.classList.add("wordmark-decoding");
-
       var iteration = 0;
 
       frame = window.setInterval(function () {
@@ -94,26 +91,20 @@
         if (iteration >= text.length) {
           window.clearInterval(frame);
           frame = null;
-
           decodeSpan.textContent = "";
           body.classList.remove("wordmark-decoding");
-
-          cooldownUntil = Date.now() + 600; // shorter cooldown
+          cooldownUntil = Date.now() + cooldownMs;
         }
-
       }, tickMs);
     }
 
     var wordmarkLink = wordmark.closest("a");
-
     if (wordmarkLink) {
       wordmarkLink.addEventListener("mouseenter", startDecode);
       wordmarkLink.addEventListener("focus", startDecode);
     }
 
-    /* faster initial decode on page load */
-
-    window.setTimeout(startDecode, 50);
+    window.setTimeout(startDecode, initialDelayMs);
   }
 
   if (document.readyState === "loading") {
@@ -121,5 +112,4 @@
   } else {
     initWordmarkDecode();
   }
-
 })();
