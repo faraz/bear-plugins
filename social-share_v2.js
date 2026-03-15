@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  var PLATFORM_ORDER = ["facebook", "linkedin", "threads", "bluesky", "mastodon", "x", "copy"];
+  var PLATFORM_ORDER = ["copy", "linkedin", "x", "bluesky", "threads", "mastodon", "facebook"];
 
   var PLATFORM_META = {
     facebook: { label: "Facebook", icon: "f" },
