@@ -4,6 +4,46 @@
 (function () {
   "use strict";
 
+  function normalizePathname() {
+    return ((window.location.pathname || "/").replace(/\/+$/, "") || "/").toLowerCase();
+  }
+
+  function cleanVeridicalQaArtifacts(root) {
+    if (!root || normalizePathname() !== "/veridical-qa") return;
+
+    var citationPattern = /\s*\[(?:[a-z][a-z0-9-]*\d{4}[a-z0-9-]*)(?:,\s*[a-z][a-z0-9-]*\d{4}[a-z0-9-]*)*\]/gi;
+    var placeholderPattern = /Modified\s+\{\{[^}]+\}\}\s+ago/gi;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var node;
+    var targets = [];
+
+    while ((node = walker.nextNode())) {
+      var parent = node.parentElement;
+      if (!parent) continue;
+      if (parent.closest("code, pre, script, style, .katex, .footnotes")) continue;
+
+      var value = node.nodeValue || "";
+      if (citationPattern.test(value) || placeholderPattern.test(value)) {
+        targets.push(node);
+      }
+
+      citationPattern.lastIndex = 0;
+      placeholderPattern.lastIndex = 0;
+    }
+
+    targets.forEach(function (textNode) {
+      var cleaned = (textNode.nodeValue || "")
+        .replace(placeholderPattern, "")
+        .replace(citationPattern, "")
+        .replace(/\s{2,}/g, " ")
+        .replace(/\s+([,.;:!?])/g, "$1");
+
+      if (cleaned !== textNode.nodeValue) {
+        textNode.nodeValue = cleaned;
+      }
+    });
+  }
+
   function directChildByClass(parent, className) {
     return Array.from(parent.children).find(function (node) {
       return node.classList && node.classList.contains(className);
@@ -16,6 +56,8 @@
 
     var main = document.querySelector("main");
     if (!main) return;
+
+    cleanVeridicalQaArtifacts(main);
 
     var existingSidebar = directChildByClass(main, "paper-sidebar");
     var existingContentWrap = directChildByClass(main, "paper-content");
