@@ -1,4 +1,4 @@
-import * as THREE from "./vendor/three-0.161.0.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/gh/faraz/bear-plugins@main/three-0.161.0.module.js";
 
 const ROUTE_PATHS = new Set(["/", "/blog", "/research", "/projects", "/til"]);
 const BAYER_8X8 = [
