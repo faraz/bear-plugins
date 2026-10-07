@@ -25,3 +25,6 @@ body>footer{display:flex;align-items:center;justify-content:space-between;flex-w
 body>footer{display:grid;grid-template-columns:1fr auto}footer .footer-links{justify-self:end}footer .bear-credit{grid-column:1/-1;justify-self:end;font-size:10px}.reading-tools>div{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap}.share-status{flex-basis:100%;text-align:right;overflow-wrap:anywhere;color:var(--accent)}.share-status:empty{display:none}
 @media(max-width:1023px){.mobile-reading-nav{margin-bottom:20px}}
 @media(max-width:599px){body>footer{grid-template-columns:1fr}footer .footer-links{justify-self:start}.reading-tools>div{max-width:65%}.share-status{font:12px/18px var(--sans);padding:6px 0}}
+
+/* Bear adds a light email background inline on its native subscribe form. */
+.subscribe form{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.subscribe input[type=email]{background-color:var(--surface)!important;padding:10px 14px!important;max-width:100%}.subscribe input[type=email]::placeholder{color:var(--muted);opacity:1}
