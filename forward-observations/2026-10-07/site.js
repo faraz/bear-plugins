@@ -41,7 +41,26 @@
     const hero=make('section','home-hero');const identity=make('div','home-identity');const masthead=make('h1','masthead');masthead.append('forward',document.createElement('br'),'observations');identity.append(masthead);
     const tagline=$('.hero-title');if(tagline)identity.append(tagline);
     const orb=make('div','orb-wrap');orb.setAttribute('aria-hidden','true');orb.innerHTML='<div class="orb-fallback"></div><canvas id="mosaic-orb"></canvas>';hero.append(identity,orb);main.prepend(hero);
-    $$('.stream').forEach((stream,i)=>{const h=$('h2',stream);h.replaceChildren(document.createTextNode(i?'Systems':'Thinking'),link(i?'All research ↗':'All writing ↗',i?'/research/':'/blog/'));});
+    const streamHeads=[];
+    $$('.stream').forEach((stream,i)=>{
+      const head=make('div','stream-head');
+      const h=$('h2',stream);h.textContent=i?'Systems':'Thinking';
+      const intro=$('.stream-intro',stream);
+      const art=make('div','stream-art');art.setAttribute('aria-hidden','true');
+      // Abstract lenses and planes: section signatures, not scientific figures.
+      art.innerHTML=`<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1" focusable="false">${i
+        ? '<path class="diagram-guide" d="M60 8v104M12 60h96"/><g class="system-plane plane-back"><path d="m60 18 42 22-42 22-42-22Z"/></g><g class="system-plane plane-mid"><path d="m60 38 42 22-42 22-42-22Z"/></g><g class="system-plane plane-front"><path d="m60 58 42 22-42 22-42-22Z"/></g><path class="system-signal" pathLength="100" d="M60 18v84"/><circle class="diagram-point" cx="60" cy="60" r="3"/>'
+        : '<path class="diagram-guide" d="M8 60h104M60 8v104"/><g class="thinking-lenses"><ellipse cx="60" cy="60" rx="23" ry="43"/><ellipse cx="60" cy="60" rx="23" ry="43" transform="rotate(60 60 60)"/><ellipse cx="60" cy="60" rx="23" ry="43" transform="rotate(120 60 60)"/></g><circle class="diagram-point" cx="60" cy="60" r="3"/>'}</svg>`;
+      const more=link(i?'All research':'All writing',i?'/research/':'/blog/');more.className='stream-more';
+      const arrow=make('span','stream-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M3 13 13 3M3 3h10v10"/></svg>';more.append(arrow);
+      h.before(head);head.append(h,art);if(intro)head.append(intro);head.append(more);streamHeads.push(head);
+    });
+    const streamObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
+      target.dataset.visible=String(isIntersecting);target.classList.toggle('is-moving',isIntersecting&&!document.hidden);
+    }));
+    streamHeads.forEach(head=>streamObserver.observe(head));
+    document.addEventListener('visibilitychange',()=>streamHeads.forEach(head=>head.classList.toggle('is-moving',head.dataset.visible==='true'&&!document.hidden)));
+
     const shell=$('[data-systems-mixed-stream]');
     if(shell){
       const initial=$$('.blog-posts li',shell).filter(li=>$('a',li));
