@@ -52,5 +52,14 @@
     "css_source": "https://fonts.googleapis.com/css2?family=IBM%20Plex%20Sans:wght@600&display=swap",
     "bytes": 24252,
     "subset": "latin"
+  },
+  {
+    "font": "IBM Plex Sans",
+    "style": "italic",
+    "weight": 400,
+    "source": "https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g6voKE7-jfBVQ.woff2",
+    "css_source": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@1,400&display=swap",
+    "bytes": 19284,
+    "subset": "latin"
   }
 ]
