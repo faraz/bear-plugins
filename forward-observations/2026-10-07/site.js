@@ -7,6 +7,7 @@
   const make = (tag, className, content) => { const n = document.createElement(tag); if (className) n.className = className; if (content) n.textContent = content; return n; };
   const link = (label, href) => { const a = make('a', '', label); a.href = href; return a; };
   const main = $('main'); if (!main) return;
+  import(new URL('background.js', document.currentScript.src).href).catch(() => {});
   main.id ||= 'main-content'; main.tabIndex = -1;
   const skip = link('Skip to content', '#'+main.id); skip.className='skip-link'; document.body.prepend(skip);
   $$('a[href^="//blog//"]').forEach(a=>a.setAttribute('href',a.getAttribute('href').replace('//blog//','/blog/')));

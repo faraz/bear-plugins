@@ -1,0 +1,10 @@
+{
+  "package": "@lucasmarkes/motes",
+  "version": "0.3.0",
+  "source": "https://registry.npmjs.org/@lucasmarkes/motes/-/motes-0.3.0.tgz",
+  "upstream": "https://github.com/lucasmarkes/motes",
+  "license": "MIT",
+  "file": "motes.js",
+  "sha256": "7688983e4f1e117c40c06ea234f3b82d35d0989dce0a2819924b9f0ff46295d0",
+  "modified": false
+}
