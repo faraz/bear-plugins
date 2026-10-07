@@ -37,7 +37,7 @@
   // Format dates in UTC so date-only publication labels cannot move backwards a day.
   $$('time[datetime]').forEach(t=>{const d=new Date(t.dateTime);if(!Number.isNaN(d.valueOf()))t.textContent=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(d);});
   if(document.body.classList.contains('home')){
-    const hero=make('section','home-hero');const identity=make('div','home-identity');const masthead=make('h2','masthead');masthead.append('forward',document.createElement('br'),'observations');identity.append(masthead);
+    const hero=make('section','home-hero');const identity=make('div','home-identity');const masthead=make('h1','masthead');masthead.append('forward',document.createElement('br'),'observations');identity.append(masthead);
     const tagline=$('.hero-title');if(tagline)identity.append(tagline);
     const orb=make('div','orb-wrap');orb.setAttribute('aria-hidden','true');orb.innerHTML='<div class="orb-fallback"></div><canvas id="mosaic-orb"></canvas>';hero.append(identity,orb);main.prepend(hero);
     $$('.stream').forEach((stream,i)=>{const h=$('h2',stream);h.replaceChildren(document.createTextNode(i?'Systems':'Thinking'),link(i?'All research ↗':'All writing ↗',i?'/research/':'/blog/'));});
