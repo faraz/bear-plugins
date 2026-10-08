@@ -95,7 +95,7 @@ body>header nav>a[aria-current=page]::after{transform:scaleX(1)}
 
 /* Bookshelf: an open editorial catalogue; covers and notes arrive with the books. */
 .page:not(.paper):not(.papers-homepage) main:has(.bookshelf){max-width:1120px}
-main:has(.bookshelf) form.upvote-form{display:none}
+main:has(.bookshelf) #upvote-form{display:none!important}
 .shelf-intro{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:end;padding:40px 0 56px;border-bottom:1px solid var(--rule)}
 .shelf-intro h1{font:600 clamp(52px,7vw,88px)/1 var(--display);letter-spacing:-.035em;margin:0;color:var(--thinking)}
 .shelf-intro>p{font:24px/34px var(--body);max-width:23ch;margin:0;color:var(--muted)}
