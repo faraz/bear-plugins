@@ -72,8 +72,10 @@ h5,h6{font-family:var(--display)}
 :root{--ease-out:cubic-bezier(.23,1,.32,1)}
 body>header nav>a{position:relative;text-decoration:none}
 body>header nav>a::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform 180ms var(--ease-out)}
+body>header nav>a[aria-current=page]{text-decoration:none}
 body>header nav>a[aria-current=page]::after{transform:scaleX(1)}
 :is(.blog-posts li>a,.systems-stream__title,.research-card__title,.reading-tools button,.footer-links a){transition:color 180ms var(--ease-out)}
+.research-card:hover{text-decoration:none}
 .research-card__media img{transition:transform 250ms var(--ease-out)}
 :is(.search-trigger,.menu-trigger,.reading-tools button){transition:color 180ms var(--ease-out),transform 120ms var(--ease-out)}
 :is(.search-trigger,.menu-trigger,.reading-tools button):active{transform:translateY(1px)}
