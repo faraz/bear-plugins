@@ -109,5 +109,42 @@
     if(!$('h1,h2',main)){const titles={'/til':'Today I learned','/projects':'Projects','/books':'Books'};main.prepend(make('h1','',titles[path]||document.title.split(' | ')[0]));}
     if(!$$('p,li,figure,table',main).some(n=>!n.closest('form')&&text(n)))main.append(make('p','empty-page','Nothing published here yet.'));
   }
+  // One bounded decode; preserve the original line break and accessible name.
+  function decodeWordmark(heading){
+    if(!heading||document.hidden)return;
+    const visual=make('span');visual.setAttribute('aria-hidden','true');
+    heading.setAttribute('aria-label','forward observations');
+    visual.append(...heading.childNodes);heading.append(visual);
+    const nodes=[...visual.childNodes].filter(n=>n.nodeType===3);
+    const originals=nodes.map(n=>n.data);
+    const length=originals.join('').length,alphabet='abcdefghijklmnopqrstuvwxyz0123456789/+=_';
+    let frame,start,last=-1;
+    const finish=()=>{
+      cancelAnimationFrame(frame);
+      nodes.forEach((n,i)=>n.data=originals[i]);
+      document.removeEventListener('visibilitychange',onHidden);
+      window.removeEventListener('pagehide',finish);
+    };
+    const onHidden=()=>{if(document.hidden)finish();};
+    const tick=now=>{
+      start??=now;
+      const elapsed=now-start;
+      if(elapsed>=750){finish();return;}
+      const step=Math.floor(elapsed/50);
+      if(step!==last){
+        last=step;let index=0;
+        const resolved=Math.floor(length*Math.min(1,elapsed/700));
+        nodes.forEach((n,i)=>n.data=[...originals[i]].map(char=>{
+          const position=index++;
+          return /\s/.test(char)||position<resolved?char:alphabet[(position*17+step*7)%alphabet.length];
+        }).join(''));
+      }
+      frame=requestAnimationFrame(tick);
+    };
+    document.addEventListener('visibilitychange',onHidden);
+    window.addEventListener('pagehide',finish);
+    frame=requestAnimationFrame(tick);
+  }
+  decodeWordmark($('.masthead')||$('body>header .title h1'));
   const footer=$('body>footer');if(footer){const directive=$('#footer-directive',footer);if(directive&&!text(directive))directive.remove();const credit=$('a[href="https://bearblog.dev"]',footer)?.parentElement;if(credit)credit.classList.add('bear-credit');const intro=make('span','','Independent writing & research');const links=make('div','footer-links');links.append(link('Subscribe ↗','/subscribe/'),link('RSS ↗','/feed/'));footer.prepend(intro,links);}
 })();
