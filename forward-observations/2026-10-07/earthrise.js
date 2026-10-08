@@ -115,12 +115,12 @@ function height(X, Z) {
         h += craters(X, Z, 34, 23, 0.12, 0.36, 0.85);
     if (Z < 170)
         h += craters(X, Z, 10, 37, 0.12, 0.34, 0.85) * smooth(170, 110, Z);
-    // one big crater in the near ground, off to the left
+    // Put the landmark crater in the middle distance, inside the shallow hero crop.
     {
-        const dx = X + 24, dz = Z - 58;
-        const q = Math.sqrt(dx * dx + dz * dz) / 16;
+        const dx = X + 24, dz = Z - 98;
+        const q = Math.sqrt(dx * dx + dz * dz) / 23;
         if (q < 2)
-            h += bowl(q, 16);
+            h += bowl(q, 23) * 1.15;
     }
     // boulders strewn close by, and a few big ones
     if (Z < 90) {
