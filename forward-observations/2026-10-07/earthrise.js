@@ -244,6 +244,10 @@ export default function earthrise() {
             const crest = r - top[x];
             if (crest < 2 && lit > 0.2)
                 b = Math.max(b, (crest ? 0.55 : 0.85) * albedo);
+            // Forward Observations: reflected sunlight lifts lit regolith, not sky or shadows.
+            b *= 1.18;
+            // Warm ridge bloom stays inside the terrain and retains the crisp glyphs.
+            b += 0.10 * Math.exp(-crest / 1.5) * smooth(0.2, 0.7, b) * lit;
             // shadow is black, but for a breath of earthshine on what faces us
             const fill = lit > 0.02 || b > 0.03 ? 0.008 + 0.007 * clamp(-hz / nl + 0.5) : 0;
             sr[k] = b * 1.0 + fill * 0.75;
