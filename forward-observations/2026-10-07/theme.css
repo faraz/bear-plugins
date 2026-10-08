@@ -15,7 +15,7 @@ main{padding:40px 0 64px;min-height:55vh}main:focus{outline:none}.home main{padd
 .stream-intro{font:16px/23px var(--body);color:var(--muted);margin:0;max-width:30ch;grid-column:1}
 .stream-more{color:var(--stream-accent);grid-column:1;display:inline-flex;align-items:center;justify-self:start;gap:12px;min-height:44px;margin-top:8px;font:12px/18px var(--mono);text-decoration:none}
 .stream-arrow{width:16px;height:16px;display:inline-flex;transition:transform .3s cubic-bezier(.16,1,.3,1)}
-.stream-more:hover .stream-arrow,.stream-more:focus-visible .stream-arrow{transform:translate(3px,-3px)}
+@media(hover:hover) and (pointer:fine){.stream-more:hover .stream-arrow{transform:translate(3px,-3px)}}
 .stream-art{grid-column:2;grid-row:1/4;align-self:center;width:112px;height:112px;color:var(--stream-accent);pointer-events:none}
 .stream-art svg{display:block;width:100%;height:100%;overflow:visible}
 .diagram-guide{stroke:var(--rule)}.diagram-point{fill:currentColor;stroke:none}
@@ -67,3 +67,26 @@ h5,h6{font-family:var(--display)}
 
 /* Embedded narrative lists share the prose measure and list inset. */
 .paper-content>.timeline>ul{padding-left:28px;margin:24px 0;line-height:1.7}
+
+/* Interaction motion: short, interruptible feedback; reading text stays in place. */
+:root{--ease-out:cubic-bezier(.23,1,.32,1)}
+body>header nav>a{position:relative;text-decoration:none}
+body>header nav>a::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform 180ms var(--ease-out)}
+body>header nav>a[aria-current=page]::after{transform:scaleX(1)}
+:is(.blog-posts li>a,.systems-stream__title,.research-card__title,.reading-tools button,.footer-links a){transition:color 180ms var(--ease-out)}
+.research-card__media img{transition:transform 250ms var(--ease-out)}
+:is(.search-trigger,.menu-trigger,.reading-tools button){transition:color 180ms var(--ease-out),transform 120ms var(--ease-out)}
+:is(.search-trigger,.menu-trigger,.reading-tools button):active{transform:translateY(1px)}
+@media(hover:hover) and (pointer:fine){
+  body>header nav>a:hover::after{transform:scaleX(1)}
+  .blog-posts li>a:hover,.systems-stream__title:hover{color:var(--stream-accent,var(--accent))}
+  .research-card:hover .research-card__title{color:var(--systems)}
+  .research-card:hover .research-card__media img{transform:scale(1.025)}
+  :is(.reading-tools button,.footer-links a):hover{color:var(--text)}
+}
+@media(max-width:859px){
+  body>header nav>a::after{left:16px;right:16px}
+  body>header nav{opacity:0;transform:translateY(-6px);transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out),display 180ms allow-discrete;pointer-events:none}
+  body>header nav.is-open{opacity:1;transform:none;pointer-events:auto}
+  @starting-style{body>header nav.is-open{opacity:0;transform:translateY(-6px)}}
+}
