@@ -92,3 +92,21 @@ body>header nav>a[aria-current=page]::after{transform:scaleX(1)}
   body>header nav.is-open{opacity:1;transform:none;pointer-events:auto}
   @starting-style{body>header nav.is-open{opacity:0;transform:translateY(-6px)}}
 }
+
+/* Bookshelf: an open editorial catalogue; covers and notes arrive with the books. */
+.page:not(.paper):not(.papers-homepage) main:has(.bookshelf){max-width:1120px}
+main:has(.bookshelf) form.upvote-form{display:none}
+.shelf-intro{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:end;padding:40px 0 56px;border-bottom:1px solid var(--rule)}
+.shelf-intro h1{font:600 clamp(52px,7vw,88px)/1 var(--display);letter-spacing:-.035em;margin:0;color:var(--thinking)}
+.shelf-intro>p{font:24px/34px var(--body);max-width:23ch;margin:0;color:var(--muted)}
+.shelf-labels{display:flex;justify-content:space-between;padding:24px 0;font:12px/18px var(--mono);color:var(--muted);border-bottom:1px solid var(--rule)}
+.shelf-empty{padding:72px 0 88px;max-width:540px}
+.shelf-empty p:first-child{font:400 32px/40px var(--display);letter-spacing:-.02em;margin:0 0 16px}
+.shelf-empty p:last-child{font:18px/28px var(--body);color:var(--muted);max-width:32ch;margin:0}
+.shelf-book{display:grid;grid-template-columns:120px minmax(0,1fr) minmax(0,1.1fr);gap:36px;padding:36px 0;border-bottom:1px solid var(--rule);align-items:start}
+.shelf-book img{display:block;width:120px;height:auto}
+.shelf-book h2{font:600 28px/34px var(--display);margin:0 0 10px;letter-spacing:-.02em}
+.shelf-book .book-author{font:16px/24px var(--body);color:var(--muted);margin:0 0 18px}
+.shelf-book .book-status{font:12px/18px var(--mono);color:var(--thinking)}
+.shelf-book .book-note{font:18px/29px var(--body);margin:0;max-width:42ch}
+@media(max-width:599px){.shelf-intro{grid-template-columns:1fr;gap:24px;padding:20px 0 36px}.shelf-intro>p{font-size:20px;line-height:29px;max-width:26ch}.shelf-labels{font-size:11px;padding:20px 0}.shelf-empty{padding:48px 0 64px}.shelf-empty p:first-child{font-size:28px;line-height:36px}.shelf-book{grid-template-columns:80px minmax(0,1fr);gap:24px;padding:28px 0}.shelf-book img{width:80px}.shelf-book h2{font-size:24px;line-height:30px}.shelf-book .book-note{grid-column:1/-1}}
