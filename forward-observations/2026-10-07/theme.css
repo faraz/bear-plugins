@@ -159,7 +159,7 @@ body>header nav>a:nth-of-type(3){margin-left:auto}
 body>header nav>a:is(:hover,:focus-visible,[aria-current]){color:var(--nav-accent)}
 body>header nav>a::after{display:none}
 body>header nav>a[aria-current]::before{content:"";position:absolute;width:4px;height:4px;left:0;bottom:2px;background:var(--nav-accent)}
-.nav-marker{position:absolute;height:1px;bottom:6px;left:0;opacity:0;pointer-events:none;transition:transform 220ms var(--ease-out),width 220ms var(--ease-out),background-color 160ms,opacity 120ms}
+.nav-marker{position:absolute;width:1px;height:1px;transform-origin:left;bottom:6px;left:0;opacity:0;pointer-events:none;transition:transform 220ms var(--ease-out),background-color 160ms,opacity 120ms}
 body>header>.search-trigger{margin-left:auto;flex-shrink:0;border:0;min-height:48px;padding:12px 0 12px 20px;font:500 15px/24px var(--sans);gap:12px}
 body>header>.search-panel{position:absolute;top:100%;left:0;right:0;max-width:none;margin:0;padding:32px;background:var(--canvas);border-bottom:1px solid var(--rule);max-height:calc(100dvh - 100px);overflow:auto;visibility:hidden;clip-path:inset(0 0 100%);transition:clip-path 180ms cubic-bezier(.4,0,1,1),visibility 0s 180ms}
 body>header>.search-panel.is-open{visibility:visible;clip-path:inset(0);transition:clip-path 240ms var(--ease-out),visibility 0s}

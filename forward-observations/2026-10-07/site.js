@@ -34,7 +34,7 @@
   document.addEventListener('pointerdown',e=>{if(!header.contains(e.target)){setMenu(false);toggleSearch(false,false);}});
   header.addEventListener('focusout',e=>{if(e.relatedTarget&&!header.contains(e.relatedTarget)){setMenu(false);toggleSearch(false,false);}});
   const marker=make('span','nav-marker');marker.setAttribute('aria-hidden','true');nav.append(marker);
-  const pointTo=a=>{if(!a||narrow.matches){marker.style.opacity='0';return;}marker.style.width=a.offsetWidth+'px';marker.style.transform='translateX('+a.offsetLeft+'px)';marker.style.background=getComputedStyle(a).getPropertyValue('--nav-accent');marker.style.opacity='1';};
+  const pointTo=a=>{if(!a||narrow.matches){marker.style.opacity='0';return;}marker.style.transform='translateX('+a.offsetLeft+'px) scaleX('+a.offsetWidth+')';marker.style.background=getComputedStyle(a).getPropertyValue('--nav-accent');marker.style.opacity='1';};
   const navLinks=$$('a',nav);
   navLinks.forEach(a=>{a.addEventListener('pointerenter',()=>pointTo(a));a.addEventListener('focus',()=>pointTo(a));});
   nav.addEventListener('pointerleave',()=>pointTo(nav.contains(document.activeElement)?document.activeElement:null));
