@@ -14,7 +14,7 @@
   const path = location.pathname.replace(/\/$/, '') || '/';
   const header = $('body>header');
   const nav = $('nav', header); nav.replaceChildren(); nav.id='site-navigation'; nav.setAttribute('aria-label','Main navigation');
-  for (const [label, href] of [['Writing','/blog/'],['Research','/research/'],['TIL','/til'],['Projects','/projects']]) {
+  for (const [label, href] of [['Writing','/blog/'],['Research','/research/'],['TIL','/til'],['Projects','/projects'],['Bookshelf','/books/']]) {
     const a = link(label,href); if (path===href.replace(/\/$/, '') || (label==='Research' && document.body.classList.contains('paper'))) a.setAttribute('aria-current','page'); nav.append(a);
   }
   const menu=make('button','menu-trigger','Menu');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-controls',nav.id);header.insertBefore(menu,nav);
