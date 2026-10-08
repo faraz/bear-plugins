@@ -52,10 +52,14 @@ body>footer{display:grid;grid-template-columns:1fr auto}footer .footer-links{jus
 /* Homepage navigation takes the former duplicate wordmark position. */
 .home>header{justify-content:flex-start}.home:has(.masthead)>header>.title{display:none}.home .menu-trigger{text-align:left}
 
-/* Motes stays beneath content; the reading column is quieter than the margins. */
-body{isolation:isolate}.motes-background{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.12;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.4) 28%,rgba(0,0,0,.4) 72%,#000)}
+/* Contour relief remains visible in margins; masks protect the actual reading columns. */
+body{isolation:isolate;--field-edge:max(64px,calc((100vw - 1312px)/2))}
+.motes-background{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.20;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.22) calc(var(--field-edge) + 32px),rgba(0,0,0,.22) calc(100% - var(--field-edge) - 32px),#000)}
+@media(min-width:860px){.home .motes-background{mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.22) calc(var(--field-edge) + 32px),rgba(0,0,0,.22) calc(50% - 48px),#000 calc(50% - 20px),#000 calc(50% + 20px),rgba(0,0,0,.22) calc(50% + 48px),rgba(0,0,0,.22) calc(100% - var(--field-edge) - 32px),#000)}}
 .post .motes-background,.paper .motes-background{opacity:.05}
-@media(max-width:599px){.motes-background{opacity:.08;mask-image:none}.post .motes-background,.paper .motes-background{opacity:.04}}
+@media(max-width:1199px){body{--field-edge:40px}}
+@media(max-width:859px){body{--field-edge:24px}.motes-background{opacity:.12}}
+@media(max-width:599px){body{--field-edge:20px}.motes-background{opacity:.10;mask-image:linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,0,0,.4) 12%,rgba(0,0,0,.4) 84%,#000)}.post .motes-background,.paper .motes-background{opacity:.04}}
 
 /* Satoshi for titles/prose; Plex for navigation/section labels; mono unchanged. */
 button,input,select,textarea,.mobile-reading-nav,.search-panel,.empty-page,.filter-empty,.status-message,th{font-family:var(--sans)}

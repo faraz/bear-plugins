@@ -8,10 +8,10 @@ canvas.setAttribute('data-motes-quiet', ''); // Deliberately low-contrast backgr
 document.body.prepend(canvas);
 try {
   const field = createMotes(canvas, {
-    effect: 'flow', speed: 0.18, density: 16, brightness: -0.12,
-    ink: '#b6d4c0', accent: '#b6d4c0', background: '#111416',
-    pointer: true, radius: 110, force: 0.18, trail: 0,
-    charset: ' .:-+', respectMotionPreference: false,
+    effect: 'contour', speed: 0.30, density: 12, contrast: 1.15, brightness: -0.08,
+    ink: '#b0b7b5', accent: '#9eb8c6', background: '#111416',
+    pointer: true, radius: 90, force: 0.12, trail: 0,
+    charset: ' .:-=+', respectMotionPreference: false,
   });
   const sync = () => document.hidden ? field.stop() : field.start();
   document.addEventListener('visibilitychange', sync);
