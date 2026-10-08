@@ -120,7 +120,15 @@
     if(location.hash){let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}const target=document.getElementById(id);if(target&&body.contains(target))requestAnimationFrame(()=>target.scrollIntoView());}
   }
 
-  const isPaper=document.body.classList.contains('paper'),isPost=document.body.classList.contains('post');
+  const isBookshelf=!!$('.bookshelf',main);
+  if(isBookshelf){
+    document.body.classList.remove('post');document.body.classList.add('page','bookshelf-page');
+    // Bear supplies an article title/date even when the page owns its introduction.
+    $(':scope > h1',main)?.remove();
+    $$(':scope > p',main).filter(p=>$('time',p)).forEach(p=>p.remove());
+    $('#upvote-form',main)?.remove();
+  }
+  const isPaper=!isBookshelf&&document.body.classList.contains('paper'),isPost=!isBookshelf&&document.body.classList.contains('post');
   if(isPaper||isPost){
     const title=$('main>h1');
     if(title){
