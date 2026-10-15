@@ -213,3 +213,47 @@ body>header .search-results{max-width:none;margin-bottom:0}
 @media(max-width:699px){.talks-intro{padding-bottom:24px}.talk-feature{grid-template-columns:1fr;gap:24px;padding:28px 0 32px}.talk-details{max-width:none}.talk-details h2{font-size:28px;line-height:34px;max-width:24ch;margin-bottom:12px}.talk-preview-action{width:36px;height:36px;right:8px;bottom:8px}.talk-preview-action svg{width:16px;height:16px}.talk-summary p{font-size:18px;line-height:28px}}
 /* Six destinations fit alongside the interior wordmark at desktop sizes. */
 @media(min-width:1160px){body:not(.home)>header{gap:20px}body:not(.home)>header nav{gap:14px}body:not(.home)>header>.title h1{font-size:20px}body:not(.home)>header nav>a{font-size:18px}}
+
+/* Writing: an editorial lead followed by a chronological index. */
+.writing-index{--mono:'Departure Mono',monospace}
+.writing-index main{max-width:1160px;padding-bottom:72px}
+.writing-intro{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:48px;margin:0 0 44px}
+.writing-intro h1{font:600 60px/1.1 var(--display);letter-spacing:-.025em;margin:0;color:var(--text)}
+.writing-intro p{max-width:32ch;justify-self:end;font:20px/1.5 var(--body);color:var(--muted);margin:0 0 4px}
+.writing-controls{display:flex;align-items:end;justify-content:space-between;gap:24px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:14px 0}
+.writing-topics{display:flex;flex-wrap:wrap;gap:4px 20px;align-items:center}
+.writing-topics a{position:relative;display:inline-flex;align-items:center;min-height:44px;color:var(--muted);font:500 15px/1.4 var(--body);text-decoration:none;text-transform:capitalize}
+.writing-topics a::after{content:'';position:absolute;bottom:2px;left:0;right:0;height:1px;background:var(--thinking);transform:scaleX(0);transform-origin:left;transition:transform 220ms var(--ease-out)}
+.writing-topics a[aria-current=true]{color:var(--thinking)}
+.writing-topics a[aria-current=true]::after,.writing-topics a:hover::after{transform:scaleX(1)}
+.writing-search{flex:0 0 196px;display:block}
+.writing-search>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.writing-index .writing-search input{width:100%;margin:0;min-height:44px;padding:8px 0 8px 12px;background:transparent;border:0;border-left:1px solid var(--rule);font:13px/1.5 var(--mono)}
+.writing-search input::placeholder{color:var(--muted);opacity:1}
+.writing-count{font:11px/18px var(--mono);color:var(--muted);margin:18px 0 4px}
+.writing-index .blog-posts .writing-row{position:relative;display:grid;grid-template-columns:80px minmax(0,1fr) 32px;gap:32px;padding:32px 0;border-top:1px solid var(--rule);isolation:isolate;animation:writing-arrive 550ms var(--ease-out) both;animation-delay:var(--row-delay)}
+.writing-row::before{content:'';position:absolute;inset:0 -16px;background:var(--thinking);opacity:0;z-index:-1;transition:opacity 200ms var(--ease-out)}
+.writing-row:hover::before,.writing-row:focus-within::before{opacity:.035}
+.writing-index .writing-row>.writing-year{font:12px/22px var(--mono);color:var(--thinking);padding-top:5px}
+.writing-entry{min-width:0}
+.writing-entry h2{font:600 30px/1.22 var(--display);letter-spacing:-.025em;margin:0 0 12px;text-wrap:pretty;max-width:28ch}
+.writing-entry h2 a{color:var(--text);text-decoration:none;transition:color 180ms var(--ease-out)}
+.writing-entry h2 a:hover{color:var(--thinking)}
+.writing-entry h2 a::after{content:'';position:absolute;inset:0;z-index:1}
+.writing-summary{font:17px/1.55 var(--body);color:var(--muted);max-width:62ch;margin:0 0 16px;text-wrap:pretty}
+.writing-meta{display:flex;gap:20px;flex-wrap:wrap;font:11px/18px var(--mono);color:var(--muted)}
+.writing-meta time{font:inherit}
+.writing-arrow{color:var(--thinking);padding-top:4px;align-self:start;transition:transform 220ms var(--ease-out)}
+.writing-arrow svg{width:24px;height:24px}
+.writing-row:hover .writing-arrow,.writing-row:focus-within .writing-arrow{transform:translate(3px,-3px)}
+.writing-index .blog-posts .writing-lead{padding:36px 0 44px;border-top:0;margin-bottom:0}
+.writing-lead .writing-entry{display:grid;grid-template-columns:1.1fr 1fr;column-gap:40px;align-items:start}
+.writing-lead h2{font-size:46px;line-height:1.12;grid-row:1 / 3;color:var(--thinking);max-width:16ch}
+.writing-lead h2 a{color:var(--thinking)}
+.writing-lead .writing-summary{font-size:19px;line-height:1.55;margin:0 0 20px}
+.writing-lead .writing-meta{grid-column:2}
+.writing-empty{padding:48px 0 64px;margin-left:112px}
+.writing-empty h2{margin:0 0 12px}.writing-empty p{color:var(--muted);font-size:18px}.writing-empty button{font-size:16px;background:transparent;border-color:var(--thinking)}
+@keyframes writing-arrive{from{opacity:.4;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1099px){.writing-controls{align-items:stretch;flex-direction:column;gap:8px}.writing-search{flex:auto;max-width:280px}.writing-index .writing-search input{border-left:0;padding-left:0}.writing-lead .writing-entry{display:block}.writing-lead h2{max-width:22ch;margin-bottom:20px}.writing-intro{gap:24px}.writing-intro p{font-size:18px}}
+@media(max-width:599px){.writing-index main{padding-bottom:40px}.writing-intro{display:block;margin-bottom:28px}.writing-intro h1{font-size:44px}.writing-intro p{margin:16px 0 0;max-width:30ch}.writing-topics{gap:0 18px}.writing-topics a{font-size:14px}.writing-index .blog-posts .writing-row{grid-template-columns:1fr 24px;gap:10px 16px;padding:24px 0}.writing-index .writing-row>.writing-year{grid-column:1 / -1;padding:0;font-size:11px}.writing-year:empty{display:none}.writing-entry h2{font-size:26px}.writing-lead h2{font-size:36px;max-width:16ch}.writing-lead .writing-summary,.writing-summary{font-size:17px}.writing-meta{font-size:10px;gap:12px}.writing-arrow svg{width:20px;height:20px}.writing-empty{margin-left:0}.writing-row::before{inset-inline:-8px}.writing-index .blog-posts .writing-lead{padding:24px 0 32px}}

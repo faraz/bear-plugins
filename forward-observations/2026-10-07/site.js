@@ -177,8 +177,71 @@
   }
   $$('table',main).forEach(table=>{const scroll=make('div','table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Scrollable data table');table.before(scroll);scroll.append(table);});
   if(document.body.classList.contains('blog')){
-    if(!$('h1',main))main.prepend(make('h1','','Writing'));
-    const list=$('.blog-posts',main);if(list){const input=make('input');input.type='search';input.placeholder='Filter writing';input.setAttribute('aria-label','Filter writing');const empty=make('p','filter-empty','No essays match your search.');empty.hidden=true;list.before(input);list.after(empty);const filterWriting=()=>{let n=0;$$('li',list).forEach(li=>{li.hidden=!input.value.toLowerCase().split(',').every(term=>(text(li)+' '+(li.dataset.tags||'')).toLowerCase().includes(term.trim()));if(!li.hidden)n++;});empty.hidden=n>0;};input.addEventListener('input',filterWriting);input.value=new URLSearchParams(location.search).get('q')||'';filterWriting();}
+    const list=$('.blog-posts',main);
+    if(list){
+      document.body.classList.add('writing-index');
+      const editorial={
+  "/input-output-metrics-management/": {
+    "summary": "Input metrics guide action, but their link to outcomes is a hypothesis. How to test that model, expose misleading targets, and know when to revise it.",
+    "minutes": 7
+  },
+  "/love-the-plateau/": {
+    "summary": "Why progress in complex skills happens in plateaus, not steady gains, and the three mechanisms that can allow people to persist when visible feedback disappears.",
+    "minutes": 4
+  },
+  "/choosing-problems-that-compound/": {
+    "summary": "How the problems you choose shape the trust you earn—and the responsibility that follows.",
+    "minutes": 3
+  },
+  "/the-logic-most-advice-skips/": {
+    "summary": "Necessary, sufficient, or helpful: the distinctions that make a promise worth testing.",
+    "minutes": 1
+  }
+}
+;
+      const heading=$('h1',main)||make('h1','','Writing');heading.textContent='Writing';
+      const intro=make('header','writing-intro');intro.append(heading,make('p','','Essays on mental models and systems thinking.'));main.prepend(intro);
+      const rows=$$('li',list).filter(row=>$('a',row));
+      const topics=[...new Set(rows.flatMap(row=>(row.dataset.tags||'').split(',').filter(Boolean)))].sort();
+      const controls=make('div','writing-controls'),topicNav=make('nav','writing-topics');topicNav.setAttribute('aria-label','Writing topics');
+      const all=link('All essays','/blog/');topicNav.append(all);
+      const topicLinks=topics.map(topic=>{const a=link(topic.replace(/-/g,' '),'/blog/?q='+encodeURIComponent(topic));a.dataset.topic=topic;topicNav.append(a);return a;});
+      const searchLabel=make('label','writing-search');searchLabel.append(make('span','','Search essays'));const input=make('input');input.type='search';input.placeholder='Find an essay';input.setAttribute('aria-label','Search essays');searchLabel.append(input);controls.append(topicNav,searchLabel);list.before(controls);
+      const status=make('p','writing-count');status.setAttribute('role','status');list.before(status);
+      const empty=make('div','writing-empty');empty.hidden=true;empty.append(make('h2','','No essays found'),make('p','','Try another phrase or return to all essays.'));const reset=make('button','','Clear filters');empty.append(reset);list.after(empty);
+      // Replace the old unstructured tag footer with the topic navigation above.
+      $$('a[href*="?q="]',main).filter(a=>!a.closest('.writing-controls')).forEach(a=>{const parent=a.parentElement;a.remove();if(parent!==main&&!text(parent))parent.remove();});
+      rows.forEach((row,index)=>{
+        const a=$('a',row),date=$('time',row),href=new URL(a.href,location.href).pathname;
+        const info=editorial[href]||{},year=date?.getAttribute('datetime')?.slice(0,4)||'';
+        row.dataset.year=year;row.classList.add('writing-row');row.style.setProperty('--row-delay',Math.min(index,5)*60+'ms');
+        const marker=make('span','writing-year',year);marker.setAttribute('aria-hidden','true');
+        const content=make('div','writing-entry'),title=make('h2');title.append(a);
+        const meta=make('div','writing-meta');if(date)meta.append(date);if(info.minutes)meta.append(make('span','',info.minutes+' min read'));
+        content.append(title);if(info.summary)content.append(make('p','writing-summary',info.summary));content.append(meta);
+        const arrow=make('span','writing-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg>';
+        row.replaceChildren(marker,content,arrow);
+      });
+      let topic='';
+      function update(fromHistory=false){
+        const filtering=!!(topic||input.value.trim());list.classList.toggle('is-filtering',filtering);
+        const oldRects=new Map(rows.filter(r=>!r.hidden).map(r=>[r,r.getBoundingClientRect()]));
+        let count=0,lastYear='';
+        rows.forEach(row=>{
+          const tags=(row.dataset.tags||'').split(',');
+          const matches=(!topic||tags.includes(topic))&&input.value.toLowerCase().split(',').every(term=>(text(row)+' '+tags.join(' ')).toLowerCase().includes(term.trim()));
+          row.hidden=!matches;row.classList.toggle('writing-lead',!filtering&&row===rows[0]);
+          if(matches){const marker=$('.writing-year',row);marker.textContent=lastYear===row.dataset.year?'':row.dataset.year;lastYear=row.dataset.year;count++;}
+        });
+        [all,...topicLinks].forEach(a=>{if((a.dataset.topic||'')===topic)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});
+        status.textContent=filtering?count+' '+(count===1?'essay':'essays')+' found':rows.length+' essays';empty.hidden=count>0;
+        if(!fromHistory)rows.filter(r=>!r.hidden).forEach(row=>{const old=oldRects.get(row),next=row.getBoundingClientRect();if(old&&Math.abs(old.top-next.top)>1)row.animate?.([{transform:`translateY(${old.top-next.top}px)`},{transform:'translateY(0)'}],{duration:260,easing:'cubic-bezier(.16,1,.3,1)'});});
+      }
+      function syncURL(push=false){const u=new URL(location.href);u.searchParams.delete('q');u.searchParams.delete('topic');if(input.value)u.searchParams.set('q',input.value);if(topic)u.searchParams.set('topic',topic);history[push?'pushState':'replaceState'](null,'',u);}
+      function readURL(){const p=new URLSearchParams(location.search),q=p.get('q')||'';topic=p.get('topic')||(topics.includes(q)?q:'');input.value=topics.includes(q)&&!p.has('topic')?'':q;update(true);}
+      [all,...topicLinks].forEach(a=>a.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();topic=a.dataset.topic||'';syncURL(true);update();}));
+      input.addEventListener('input',()=>{syncURL();update();});reset.addEventListener('click',()=>{topic='';input.value='';syncURL();update();input.focus();});window.addEventListener('popstate',readURL);readURL();
+    }
   }
   if(document.body.classList.contains('page')&&!isPaper&&!document.body.classList.contains('papers-homepage')){
     if(!$('h1,h2',main)){const titles={'/til':'Today I learned','/projects':'Projects','/books':'Books'};main.prepend(make('h1','',titles[path]||document.title.split(' | ')[0]));}
