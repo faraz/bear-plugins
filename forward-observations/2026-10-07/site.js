@@ -14,9 +14,9 @@
   const path = location.pathname.replace(/\/$/, '') || '/';
   const header = $('body>header');
   const nav = $('nav', header); nav.replaceChildren(); nav.id='site-navigation'; nav.setAttribute('aria-label','Main navigation');
-  for (const [label, href] of [['Writing','/blog/'],['Research','/research/'],['TIL','/til'],['Projects','/projects'],['Bookshelf','/books/']]) {
+  for (const [label, href] of [['Writing','/blog/'],['Research','/research/'],['Talks','/talks/'],['TIL','/til'],['Projects','/projects'],['Bookshelf','/books/']]) {
     const a = link(label,href);
-    const section=(label==='Research' && document.body.classList.contains('paper')) || (label==='Writing' && !$('.bookshelf',main) && document.body.classList.contains('post') && !document.body.classList.contains('paper'));
+    const section=(label==='Research' && document.body.classList.contains('paper')) || (label==='Writing' && !$('.bookshelf,.talks',main) && document.body.classList.contains('post') && !document.body.classList.contains('paper'));
     if(path===href.replace(/\/$/, '')) a.setAttribute('aria-current','page');
     else if(section) a.setAttribute('aria-current','location');
     nav.append(a);
@@ -138,14 +138,21 @@
   }
 
   const isBookshelf=!!$('.bookshelf',main);
-  if(isBookshelf){
-    document.body.classList.remove('post');document.body.classList.add('page','bookshelf-page');
+  const isTalks=!!$('.talks',main);
+  if(isBookshelf||isTalks){
+    document.body.classList.remove('post');document.body.classList.add('page',isTalks?'talks-page':'bookshelf-page');
     // Bear supplies an article title/date even when the page owns its introduction.
     $(':scope > h1',main)?.remove();
     $$(':scope > p',main).filter(p=>$('time',p)).forEach(p=>p.remove());
     $('#upvote-form',main)?.remove();
   }
-  const isPaper=!isBookshelf&&document.body.classList.contains('paper'),isPost=!isBookshelf&&document.body.classList.contains('post');
+  if(isTalks){
+    $$('.talk-viewport',main).forEach(viewport=>{
+      const fit=()=>viewport.style.setProperty('--talk-scale',viewport.clientWidth/1920);
+      new ResizeObserver(fit).observe(viewport);fit();
+    });
+  }
+  const isPaper=!isBookshelf&&!isTalks&&document.body.classList.contains('paper'),isPost=!isBookshelf&&!isTalks&&document.body.classList.contains('post');
   if(isPaper||isPost){
     const title=$('main>h1');
     if(title){
