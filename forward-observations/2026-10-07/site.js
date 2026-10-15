@@ -214,13 +214,14 @@
       rows.forEach((row,index)=>{
         const a=$('a',row),date=$('time',row),href=new URL(a.href,location.href).pathname;
         const info=editorial[href]||{},year=date?.getAttribute('datetime')?.slice(0,4)||'';
-        row.dataset.year=year;row.classList.add('writing-row');row.style.setProperty('--row-delay',Math.min(index,5)*60+'ms');
+        row.dataset.year=year;row.classList.add('writing-row');
         const marker=make('span','writing-year',year);marker.setAttribute('aria-hidden','true');
         const content=make('div','writing-entry'),title=make('h2');title.append(a);
         const meta=make('div','writing-meta');if(date)meta.append(date);if(info.minutes)meta.append(make('span','',info.minutes+' min read'));
         content.append(title);if(info.summary)content.append(make('p','writing-summary',info.summary));content.append(meta);
         const arrow=make('span','writing-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg>';
         row.replaceChildren(marker,content,arrow);
+        row.animate?.([{opacity:.4,transform:"translateY(10px)"},{opacity:1,transform:"translateY(0)"}],{duration:550,delay:Math.min(index,5)*60,easing:"cubic-bezier(.16,1,.3,1)"});
       });
       let topic='';
       function update(fromHistory=false){
