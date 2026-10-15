@@ -190,7 +190,7 @@
     "minutes": 4
   },
   "/choosing-problems-that-compound/": {
-    "summary": "How the problems you choose shape the trust you earn—and the responsibility that follows.",
+    "summary": "How the problems you choose shape the trust you earn and the responsibility that follows.",
     "minutes": 3
   },
   "/the-logic-most-advice-skips/": {
