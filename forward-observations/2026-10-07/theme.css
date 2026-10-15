@@ -158,7 +158,7 @@ body>header nav>a:nth-of-type(2){--nav-accent:var(--systems)}
 body>header nav>a:nth-of-type(3){margin-left:auto}
 body>header nav>a:is(:hover,:focus-visible){color:color-mix(in srgb,var(--nav-accent) 65%,white)}
 body>header nav>a::after{display:none}
-body>header nav>a[aria-current]::before{content:"";position:absolute;width:4px;height:4px;left:0;bottom:2px;background:var(--nav-accent)}
+body>header nav>a[aria-current]::before{content:"";position:absolute;width:16px;height:1px;left:0;bottom:2px;background:var(--nav-accent)}
 .nav-marker{position:absolute;width:1px;height:1px;transform-origin:left;bottom:6px;left:0;opacity:0;pointer-events:none;transition:transform 220ms var(--ease-out),background-color 160ms,opacity 120ms}
 body>header>.search-trigger{margin-left:auto;flex-shrink:0;border:0;min-height:48px;padding:12px 0 12px 20px;font:500 15px/24px var(--sans);gap:12px}
 body>header>.search-panel{position:absolute;top:100%;left:0;right:0;max-width:none;margin:0;padding:32px;background:var(--canvas);border-bottom:1px solid var(--rule);max-height:calc(100dvh - 100px);overflow:auto;visibility:hidden;clip-path:inset(0 0 100%);transition:clip-path 180ms cubic-bezier(.4,0,1,1),visibility 0s 180ms}
@@ -184,28 +184,32 @@ body>header .search-results{max-width:none;margin-bottom:0}
 
 @media(min-width:1160px){body:not(.home)>header{gap:24px}body:not(.home)>header nav{gap:24px}}
 
-/* Talks: a live opening slide, with the deck itself as the primary artifact. */
+/* Talks: compact editorial rows; the live slide and its context share a baseline. */
 .page.talks-page:not(.paper):not(.papers-homepage) main{max-width:none;margin-inline:0}
-.talks-intro{display:flex;align-items:baseline;justify-content:space-between;gap:32px;padding-bottom:36px;border-bottom:1px solid var(--rule)}
+.talks-intro{display:flex;align-items:baseline;justify-content:space-between;gap:32px;padding-bottom:32px;border-bottom:1px solid var(--rule)}
 .talks-intro h1{margin:0}
 .talks-intro p{font:18px/28px var(--body);color:var(--muted);max-width:32ch;margin:0}
-.talk-feature{padding-top:36px}
+.talk-feature{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:center;gap:48px;padding:36px 0;border-bottom:1px solid var(--rule)}
 .talk-preview{display:block;position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--surface);color:var(--text);text-decoration:none}
-.talk-viewport{position:absolute;inset:0;overflow:hidden;pointer-events:none;container-type:inline-size}
+.talk-viewport{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .talk-viewport iframe{display:block;width:1920px;height:1080px;max-width:none;border:0;transform-origin:top left;transform:scale(var(--talk-scale,.5));pointer-events:none}
-.talk-preview-action{position:absolute;right:24px;bottom:24px;display:flex;align-items:center;gap:20px;padding:12px 16px;background:var(--canvas);color:var(--accent);font:500 14px/20px var(--mono)}
+.talk-preview::after{content:"";position:absolute;inset:0;border:1px solid var(--accent);pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 300ms cubic-bezier(.16,1,.3,1)}
+.talk-preview-action{position:absolute;right:12px;bottom:12px;display:grid;place-items:center;width:44px;height:44px;background:var(--canvas);color:var(--accent)}
 .talk-preview-action svg{width:20px;height:20px;transition:transform 250ms cubic-bezier(.16,1,.3,1)}
-.talk-details{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;padding:32px 0 40px;border-bottom:1px solid var(--rule)}
-.talk-details h2{font:600 38px/44px var(--display);letter-spacing:-.025em;margin:0;max-width:20ch;text-wrap:balance}
-.talk-details h2 a{color:var(--text);text-decoration:none}
-.talk-summary p{font:20px/30px var(--body);color:var(--muted);margin:0 0 24px;max-width:38ch}
-.talk-launch{display:flex;align-items:center;flex-wrap:wrap;gap:12px;min-height:44px;font:600 16px/24px var(--mono);text-decoration:none}
-.talk-launch svg{width:16px;height:16px}
-.talk-link-note{flex-basis:100%;font:400 12px/18px var(--mono);color:var(--muted)}
+.talk-details{min-width:0;max-width:460px}
+.talk-details h2{font:600 32px/38px var(--display);letter-spacing:-.025em;margin:0 0 20px;text-wrap:balance}
+.talk-details h2 a{color:var(--text);text-decoration:none;transition:color 180ms ease-out}
+.talk-summary p{font:18px/28px var(--body);color:var(--muted);margin:0 0 24px;max-width:36ch}
+.talk-launch{display:inline-flex;align-items:center;gap:14px;min-height:44px;font:600 16px/24px var(--mono);text-decoration:none;position:relative}
+.talk-launch::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:1px;background:currentColor;transform:scaleX(.2);transform-origin:left;transition:transform 250ms cubic-bezier(.16,1,.3,1)}
+.talk-launch svg{width:16px;height:16px;transition:transform 250ms cubic-bezier(.16,1,.3,1)}
 .talk-preview:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
-.talk-preview:focus-visible .talk-preview-action svg{transform:translate(3px,-3px)}
-@media(hover:hover) and (pointer:fine){.talk-preview:hover .talk-preview-action svg{transform:translate(3px,-3px)}.talk-details h2 a:hover{color:var(--accent)}}
-@media(max-width:859px){.talks-intro h1{font-size:44px;line-height:50px}.talks-intro{display:block}.talks-intro p{margin-top:16px}.talk-details{grid-template-columns:1fr;gap:20px;padding-top:24px}.talk-details h2{font-size:30px;line-height:37px;max-width:24ch}.talk-summary p{font-size:18px;line-height:28px}.talk-preview-action{right:12px;bottom:12px;padding:8px 12px;font-size:12px;gap:12px}.talk-preview-action svg{width:16px;height:16px}}
-@media(max-width:599px){.talks-intro{padding-bottom:28px}.talk-feature{padding-top:28px}.talk-preview-action{position:static;justify-content:space-between;padding:12px 0;background:var(--canvas)}.talk-preview{aspect-ratio:auto;overflow:visible}.talk-viewport{position:relative;aspect-ratio:16/9}.talk-summary p{margin-bottom:16px}}
+.talk-preview:focus-visible::after{clip-path:inset(0)}
+.talk-preview:focus-visible .talk-preview-action svg,.talk-launch:focus-visible svg{transform:translate(3px,-3px)}
+.talk-launch:focus-visible::after{transform:scaleX(1)}
+@media(hover:hover) and (pointer:fine){.talk-preview:hover::after{clip-path:inset(0)}.talk-preview:hover .talk-preview-action svg,.talk-launch:hover svg{transform:translate(3px,-3px)}.talk-launch:hover::after{transform:scaleX(1)}.talk-launch:hover{text-decoration:none}.talk-details h2 a:hover{color:var(--accent)}}
+@media(max-width:1099px){.talk-feature{gap:32px}.talk-details h2{font-size:30px;line-height:36px}.talk-summary p{font-size:17px;line-height:26px;margin-bottom:16px}}
+@media(max-width:859px){.talks-intro h1{font-size:44px;line-height:50px}.talks-intro{display:block}.talks-intro p{margin-top:16px}}
+@media(max-width:699px){.talks-intro{padding-bottom:24px}.talk-feature{grid-template-columns:1fr;gap:24px;padding:28px 0 32px}.talk-details{max-width:none}.talk-details h2{font-size:28px;line-height:34px;max-width:24ch;margin-bottom:12px}.talk-preview-action{width:36px;height:36px;right:8px;bottom:8px}.talk-preview-action svg{width:16px;height:16px}.talk-summary p{font-size:18px;line-height:28px}}
 /* Six destinations fit alongside the interior wordmark at desktop sizes. */
 @media(min-width:1160px){body:not(.home)>header{gap:20px}body:not(.home)>header nav{gap:14px}body:not(.home)>header>.title h1{font-size:20px}body:not(.home)>header nav>a{font-size:18px}}
