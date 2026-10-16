@@ -300,11 +300,13 @@ body>header .search-results{max-width:none;margin-bottom:0}
 .bookshelf-dimensional .shelf-book-link:focus-visible{outline-offset:8px}
 .bookshelf-dimensional .shelf-book-link:focus-visible .book-volume{transform:translateY(-12px) rotateY(-3deg) rotateZ(1deg);filter:drop-shadow(12px 18px 10px #0009)}
 @media(hover:hover) and (pointer:fine){.bookshelf-dimensional .shelf-book-link:hover .book-volume{transform:translateY(-12px) rotateY(-3deg) rotateZ(1deg);filter:drop-shadow(12px 18px 10px #0009)}}
-.shelf-arrived .shelf-cover::before{animation:shelf-place 650ms cubic-bezier(.16,1,.3,1)}
-.shelf-arrived .shelf-cover::after{animation:shelf-light 900ms cubic-bezier(.16,1,.3,1)}
-.shelf-arrived .book-volume{animation:book-settle 700ms cubic-bezier(.16,1,.3,1);animation-delay:var(--book-delay,0ms)}
-@keyframes shelf-place{from{opacity:.35;transform:translateY(5px) scaleX(.96)}to{opacity:1;transform:translateY(0) scaleX(1)}}
-@keyframes shelf-light{from{opacity:.25;clip-path:polygon(0 0,0 0,0 100%,0 100%)}to{opacity:1;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 100%,0 100%)}}
-@keyframes book-settle{from{transform:translateY(-9px) rotateY(-30deg) rotateZ(-3deg)}to{transform:translateY(0) rotateY(-18deg) rotateZ(-1deg)}}
+.shelf-ready:not(.shelf-arrived) .book-volume{opacity:0;translate:0 -64px}
+.shelf-ready:not(.shelf-arrived) .shelf-cover::before,.shelf-ready:not(.shelf-arrived) .shelf-cover::after{opacity:0;transform:scaleX(0)}
+.shelf-arrived .shelf-cover::before,.shelf-arrived .shelf-cover::after{animation:shelf-draw 1100ms cubic-bezier(.22,1,.36,1) both}
+.shelf-arrived .book-volume{animation:book-drop 620ms linear backwards;animation-delay:var(--book-delay,140ms)}
+.shelf-ready .shelf-book-link:focus-visible .book-volume{opacity:1;translate:none;animation:none}
+.bookshelf-dimensional .shelf-book-link:active .book-volume{transform:translateY(-4px) rotateY(-8deg);transition-duration:100ms}
+@keyframes shelf-draw{from{opacity:.2;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+@keyframes book-drop{0%{opacity:0;translate:0 -64px;animation-timing-function:cubic-bezier(.42,0,.8,.6)}18%{opacity:1}72%{translate:0 0;animation-timing-function:ease-out}86%{translate:0 -3px;animation-timing-function:ease-in}100%{opacity:1;translate:0 0}}
 @media(max-width:1099px){.bookshelf-dimensional{--shelf-span:calc(300% + 48px)}.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:block}}
 @media(max-width:599px){.bookshelf-dimensional{--shelf-span:calc(200% + 20px)}.bookshelf-dimensional .shelf-year{margin-top:32px}.bookshelf-dimensional .shelf-year-heading{margin-bottom:8px;padding-bottom:12px}.bookshelf-dimensional .shelf-year-heading h2{font-size:20px}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::after{display:block}}

@@ -248,16 +248,19 @@
     if(!$('h1,h2',main)){const titles={'/til':'Today I learned','/projects':'Projects','/books':'Books'};main.prepend(make('h1','',titles[path]||document.title.split(' | ')[0]));}
     if(!$$('p,li,figure,table',main).some(n=>!n.closest('form')&&text(n)))main.append(make('p','empty-page','Nothing published here yet.'));
   }
-  // Shelves settle once when first encountered, never looping while reading.
-  if(isBookshelf){
-    const shelves=$$('.shelf-year',main);
-    shelves.forEach(shelf=>$$('.shelf-book',shelf).forEach((book,i)=>book.style.setProperty('--book-delay',Math.min(i,4)*45+'ms')));
-    if('IntersectionObserver' in window){
-      const shelfObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
-        if(entry.isIntersecting){entry.target.classList.add('shelf-arrived');shelfObserver.unobserve(entry.target);}
-      }),{threshold:.08});
-      shelves.forEach(shelf=>shelfObserver.observe(shelf));
-    }
+  // Each visible row draws its ledge while books land from left to right.
+  if(isBookshelf && 'IntersectionObserver' in window){
+    const shelfObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const book=entry.target;
+        const columns=getComputedStyle(book.parentElement).gridTemplateColumns.split(' ').length;
+        const index=$$('.shelf-book',book.parentElement).indexOf(book);
+        book.style.setProperty('--book-delay',(140+(index%columns)*140)+'ms');
+        book.classList.add('shelf-arrived');
+        shelfObserver.unobserve(book);
+      }
+    }),{threshold:0,rootMargin:'0px 0px -24px 0px'});
+    $$('.shelf-book',main).forEach(book=>{book.classList.add('shelf-ready');shelfObserver.observe(book);});
   }
   // One bounded decode; preserve the original line break and accessible name.
   function decodeWordmark(heading){
