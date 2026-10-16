@@ -248,6 +248,17 @@
     if(!$('h1,h2',main)){const titles={'/til':'Today I learned','/projects':'Projects','/books':'Books'};main.prepend(make('h1','',titles[path]||document.title.split(' | ')[0]));}
     if(!$$('p,li,figure,table',main).some(n=>!n.closest('form')&&text(n)))main.append(make('p','empty-page','Nothing published here yet.'));
   }
+  // Shelves settle once when first encountered, never looping while reading.
+  if(isBookshelf){
+    const shelves=$$('.shelf-year',main);
+    shelves.forEach(shelf=>$$('.shelf-book',shelf).forEach((book,i)=>book.style.setProperty('--book-delay',Math.min(i,4)*45+'ms')));
+    if('IntersectionObserver' in window){
+      const shelfObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(entry.isIntersecting){entry.target.classList.add('shelf-arrived');shelfObserver.unobserve(entry.target);}
+      }),{threshold:.08});
+      shelves.forEach(shelf=>shelfObserver.observe(shelf));
+    }
+  }
   // One bounded decode; preserve the original line break and accessible name.
   function decodeWordmark(heading){
     if(!heading||document.hidden)return;

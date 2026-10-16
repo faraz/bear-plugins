@@ -263,7 +263,7 @@ body>header .search-results{max-width:none;margin-bottom:0}
 .shelf-year-heading{display:flex;align-items:baseline;gap:24px;margin-bottom:24px}
 .shelf-year-heading h2{font:400 24px/32px var(--mono);color:var(--thinking);letter-spacing:0;margin:0}
 .shelf-year-heading p{font:12px/20px var(--mono);color:var(--muted);margin:0}
-.bookshelf-dimensional .shelf-catalogue{grid-template-columns:repeat(5,minmax(0,1fr));gap:36px 24px;padding:0}
+.bookshelf-dimensional .shelf-catalogue{grid-template-columns:repeat(6,minmax(0,1fr));gap:36px 24px;padding:0}
 .bookshelf-dimensional .shelf-book{padding:0;border:0}
 .bookshelf-dimensional .shelf-book-link{display:block;perspective:none}
 .bookshelf-dimensional .shelf-cover{display:flex;align-items:flex-end;justify-content:center;width:100%;height:246px;padding:0 10px 24px;perspective:900px;transform:none;transform-style:flat;isolation:isolate}
@@ -284,5 +284,27 @@ body>header .search-results{max-width:none;margin-bottom:0}
 .bookshelf-dimensional .shelf-book-link:active .book-volume{transform:translateY(-4px) rotateY(-8deg)}
 @media(max-width:1099px){.bookshelf-dimensional .shelf-catalogue{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:40px}.bookshelf-dimensional .shelf-cover{height:250px}.book-volume{width:144px}}
 @media(max-width:599px){.shelf-year{margin-top:28px}.shelf-year-heading{gap:16px;margin-bottom:16px}.shelf-year-heading h2{font-size:22px}.shelf-year-heading p{font-size:11px}.bookshelf-dimensional .shelf-catalogue{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:32px}.bookshelf-dimensional .shelf-cover{height:198px;padding:0 8px 24px}.book-volume{width:112px}.bookshelf-dimensional .shelf-cover::before,.bookshelf-dimensional .shelf-cover::after{left:-10px;right:-10px}.bookshelf-dimensional .book-details{padding-top:20px}.bookshelf-dimensional .shelf-book h2{font-size:19px;line-height:1.3}.bookshelf-dimensional .shelf-book .book-author{font-size:14px}.bookshelf-dimensional .book-link-label{font-size:11px}.bookshelf-dimensional .shelf-book .book-note{font-size:12px}}
-@media(min-width:600px) and (max-width:1099px){.bookshelf-dimensional .shelf-book:nth-child(3n+2):last-child .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+2):last-child .shelf-cover::after{right:calc(-100% - 36px)}.bookshelf-dimensional .shelf-book:nth-child(3n+1):last-child .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1):last-child .shelf-cover::after{right:calc(-200% - 60px)}}
-@media(max-width:599px){.bookshelf-dimensional .shelf-book:nth-child(2n+1):last-child .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(2n+1):last-child .shelf-cover::after{right:calc(-100% - 30px)}}
+
+/* Each row owns one continuous shelf, including rows with only one book. */
+.bookshelf-dimensional{--shelf-span:calc(600% + 120px)}
+.bookshelf-dimensional .shelf-year{margin-top:48px;padding-bottom:20px}
+.bookshelf-dimensional .shelf-year-heading{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.bookshelf-dimensional .shelf-catalogue{row-gap:44px}
+.bookshelf-dimensional .shelf-cover{isolation:auto;z-index:0}
+.bookshelf-dimensional .shelf-cover::before,.bookshelf-dimensional .shelf-cover::after{display:none;left:0;right:auto;width:var(--shelf-span);pointer-events:none;transform:none;transform-origin:left center;border:0}
+.bookshelf-dimensional .shelf-cover::before{height:12px;bottom:0;background:linear-gradient(180deg,#56605d 0,#303a38 2px,#222a29 5px,#171d1d 100%);box-shadow:0 15px 18px -8px #000b,0 3px 5px -2px #0009;border-bottom:1px solid #444c47}
+.bookshelf-dimensional .shelf-cover::after{height:18px;bottom:12px;background:linear-gradient(180deg,#1d2525,#394441 80%,#68736a);clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 100%,0 100%);border-bottom:1px solid #9caa9266}
+.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::after{display:block}
+.bookshelf-dimensional .book-volume{z-index:1;transform:rotateY(-18deg) rotateZ(-1deg);filter:drop-shadow(9px 7px 6px #0009)}
+.bookshelf-dimensional .book-volume::after{background:linear-gradient(90deg,#0006,transparent 4%,#fff3 6%,transparent 10%);border-color:#ffffff20}
+.bookshelf-dimensional .shelf-book-link:focus-visible{outline-offset:8px}
+.bookshelf-dimensional .shelf-book-link:focus-visible .book-volume{transform:translateY(-12px) rotateY(-3deg) rotateZ(1deg);filter:drop-shadow(12px 18px 10px #0009)}
+@media(hover:hover) and (pointer:fine){.bookshelf-dimensional .shelf-book-link:hover .book-volume{transform:translateY(-12px) rotateY(-3deg) rotateZ(1deg);filter:drop-shadow(12px 18px 10px #0009)}}
+.shelf-arrived .shelf-cover::before{animation:shelf-place 650ms cubic-bezier(.16,1,.3,1)}
+.shelf-arrived .shelf-cover::after{animation:shelf-light 900ms cubic-bezier(.16,1,.3,1)}
+.shelf-arrived .book-volume{animation:book-settle 700ms cubic-bezier(.16,1,.3,1);animation-delay:var(--book-delay,0ms)}
+@keyframes shelf-place{from{opacity:.35;transform:translateY(5px) scaleX(.96)}to{opacity:1;transform:translateY(0) scaleX(1)}}
+@keyframes shelf-light{from{opacity:.25;clip-path:polygon(0 0,0 0,0 100%,0 100%)}to{opacity:1;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 100%,0 100%)}}
+@keyframes book-settle{from{transform:translateY(-9px) rotateY(-30deg) rotateZ(-3deg)}to{transform:translateY(0) rotateY(-18deg) rotateZ(-1deg)}}
+@media(max-width:1099px){.bookshelf-dimensional{--shelf-span:calc(300% + 48px)}.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:block}}
+@media(max-width:599px){.bookshelf-dimensional{--shelf-span:calc(200% + 20px)}.bookshelf-dimensional .shelf-year{margin-top:32px}.bookshelf-dimensional .shelf-year-heading{margin-bottom:8px;padding-bottom:12px}.bookshelf-dimensional .shelf-year-heading h2{font-size:20px}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::after{display:block}}
