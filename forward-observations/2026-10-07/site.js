@@ -263,42 +263,56 @@
     }),{threshold:0,rootMargin:'0px 0px -24px 0px'});
     $$('.shelf-book',main).forEach(book=>{book.classList.add('shelf-ready');shelfObserver.observe(book);});
   }
-  // One bounded decode; preserve the original line break and accessible name.
-  function decodeWordmark(heading){
-    if(!heading||document.hidden)return;
-    const visual=make('span');visual.setAttribute('aria-hidden','true');
-    heading.setAttribute('aria-label','forward observations');
-    visual.append(...heading.childNodes);heading.append(visual);
-    const nodes=[...visual.childNodes].filter(n=>n.nodeType===3);
-    const originals=nodes.map(n=>n.data);
-    const length=originals.join('').length,alphabet='abcdefghijklmnopqrstuvwxyz0123456789/+=_';
-    let frame,start,last=-1;
+  // One mechanical arrival; the accessible title stays stable through every flip.
+  function splitFlapWordmark(heading){
+    if(!heading)return;
+    heading.classList.add('split-flap');
+    heading.setAttribute('aria-label','Forward Observations');
+    heading.replaceChildren();
+    const tiles=[],alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for(const word of ['Forward','Observations']){
+      const row=make('span','flap-row');row.setAttribute('aria-hidden','true');
+      for(const target of word){
+        const tile=make('span','flap-tile');
+        const parts=['top','bottom','front','back'].map(part=>{
+          const half=make('span','flap-half flap-'+part);
+          const glyph=make('span','flap-glyph',target);half.append(glyph);tile.append(half);
+          return {half,glyph};
+        });
+        row.append(tile);tiles.push({target,parts,step:-1,sequence:Array.from({length:12},()=>alphabet[Math.floor(Math.random()*26)]).concat(target)});
+      }
+      heading.append(row);
+    }
+    const order=tiles.map((_,i)=>i);
+    for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+    let frame,start;
     const finish=()=>{
       cancelAnimationFrame(frame);
-      nodes.forEach((n,i)=>n.data=originals[i]);
+      tiles.forEach(({target,parts})=>parts.forEach(({half,glyph},i)=>{glyph.textContent=target;half.style.transform='';if(i>1)half.hidden=true;}));
       document.removeEventListener('visibilitychange',onHidden);
       window.removeEventListener('pagehide',finish);
     };
     const onHidden=()=>{if(document.hidden)finish();};
     const tick=now=>{
-      start??=now;
-      const elapsed=now-start;
-      if(elapsed>=750){finish();return;}
-      const step=Math.floor(elapsed/50);
-      if(step!==last){
-        last=step;let index=0;
-        const resolved=Math.floor(length*Math.min(1,elapsed/700));
-        nodes.forEach((n,i)=>n.data=[...originals[i]].map(char=>{
-          const position=index++;
-          return /\s/.test(char)||position<resolved?char:alphabet[(position*17+step*7)%alphabet.length];
-        }).join(''));
-      }
-      frame=requestAnimationFrame(tick);
+      start??=now;let running=false;
+      tiles.forEach((tile,i)=>{
+        const elapsed=now-start-order[i]*35,step=Math.floor(Math.max(0,elapsed)/90);
+        const {parts,sequence,target}=tile;
+        if(step>=sequence.length){parts.forEach(({half,glyph},j)=>{glyph.textContent=target;if(j>1)half.hidden=true;});return;}
+        running=true;
+        const current=step?sequence[step-1]:' ',next=sequence[step];
+        if(tile.step!==step){tile.step=step;parts.forEach(({glyph},j)=>glyph.textContent=(j===0||j===3)?next:current);}
+        const progress=elapsed<0?0:(elapsed%90)/90;
+        parts[2].half.style.transform=`rotateX(${-Math.min(1,progress*2)*90}deg)`;
+        parts[3].half.style.transform=`rotateX(${Math.min(1,Math.max(0,1-(progress-.5)*2))*90}deg)`;
+      });
+      if(running)frame=requestAnimationFrame(tick);else finish();
     };
+    if(document.hidden){finish();return;}
     document.addEventListener('visibilitychange',onHidden);
     window.addEventListener('pagehide',finish);
     frame=requestAnimationFrame(tick);
   }
-  decodeWordmark($('.masthead')||$('body>header .title h1'));
+  splitFlapWordmark($('.home-hero .masthead'));
   const footer=$('body>footer');if(footer){const directive=$('#footer-directive',footer);if(directive&&!text(directive))directive.remove();const credit=$('a[href="https://bearblog.dev"]',footer)?.parentElement;if(credit)credit.classList.add('bear-credit');const intro=make('span','','Independent writing & research');const links=make('div','footer-links');links.append(link('Subscribe ↗','/subscribe/'),link('RSS ↗','/feed/'));footer.prepend(intro,links);}
 })();

@@ -310,3 +310,17 @@ body>header .search-results{max-width:none;margin-bottom:0}
 @keyframes book-drop{0%{opacity:0;translate:0 -64px;animation-timing-function:cubic-bezier(.42,0,.8,.6)}18%{opacity:1}72%{translate:0 0;animation-timing-function:ease-out}86%{translate:0 -3px;animation-timing-function:ease-in}100%{opacity:1;translate:0 0}}
 @media(max-width:1099px){.bookshelf-dimensional{--shelf-span:calc(300% + 48px)}.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(6n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:block}}
 @media(max-width:599px){.bookshelf-dimensional{--shelf-span:calc(200% + 20px)}.bookshelf-dimensional .shelf-year{margin-top:32px}.bookshelf-dimensional .shelf-year-heading{margin-bottom:8px;padding-bottom:12px}.bookshelf-dimensional .shelf-year-heading h2{font-size:20px}.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(3n+1) .shelf-cover::after{display:none}.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::before,.bookshelf-dimensional .shelf-book:nth-child(2n+1) .shelf-cover::after{display:block}}
+
+/* Split-flap wordmark: clipped glyph halves share an exact center hinge. */
+.masthead.split-flap{font-size:clamp(16px,9cqi,42px);line-height:1;letter-spacing:0;display:flex;flex-direction:column;gap:6px;width:max-content;max-width:100%}
+.flap-row{display:flex;gap:3px}
+.flap-tile{position:relative;display:block;width:.74em;height:1.12em;perspective:240px;border-radius:3px;background:#16499f;box-shadow:0 2px 3px #0008,inset 0 0 0 1px #93b6ff70;color:#f5f5f5}
+.flap-tile::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#081c4799;z-index:5;pointer-events:none}
+.flap-half{position:absolute;left:0;width:100%;height:50%;overflow:hidden;background:#276cff;backface-visibility:hidden}
+.flap-top,.flap-front{top:0;border-radius:3px 3px 0 0;background:linear-gradient(#4782ff,#276cff);transform-origin:center bottom}
+.flap-bottom,.flap-back{bottom:0;border-radius:0 0 3px 3px;background:linear-gradient(#205bd9,#276cff);transform-origin:center top}
+.flap-glyph{position:absolute;left:0;width:100%;height:1.12em;line-height:1.12em;text-align:center}
+.flap-bottom .flap-glyph,.flap-back .flap-glyph{bottom:0}
+.flap-front,.flap-back{z-index:3}
+.flap-half[hidden]{display:none}
+@media(max-width:599px){.home-identity{width:100%}.masthead.split-flap{font-size:clamp(16px,8cqi,32px)}}
