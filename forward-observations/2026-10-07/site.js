@@ -8,6 +8,7 @@
   const link = (label, href) => { const a = make('a', '', label); a.href = href; return a; };
   const main = $('main'); if (!main) return;
   import(new URL('background.js', document.currentScript.src).href).catch(() => {});
+  if ($('.research-card__media')) import(new URL('research-backgrounds.js', document.currentScript.src).href).catch(() => {});
   main.id ||= 'main-content'; main.tabIndex = -1;
   const skip = link('Skip to content', '#'+main.id); skip.className='skip-link'; document.body.prepend(skip);
   $$('a[href^="//blog//"]').forEach(a=>a.setAttribute('href',a.getAttribute('href').replace('//blog//','/blog/')));
