@@ -65,9 +65,25 @@
     grow([0,68,0],-Math.PI/2,38,0,-1);return branches;
   }
   function thinkingTiming(time,depth){
-    const growth=Math.max(0,Math.min(1,(time-depth*.5)/.5));
-    const wave=(time-3.5)%5,travel=(wave-depth*.28)/.28;
-    return {growth,travel,active:time>=3.5&&travel>=0&&travel<=1,flash:time>=3.5?Math.max(0,1-Math.abs(wave-(depth+1)*.28)/.35):0};
+    return {growth:Math.max(0,Math.min(1,(time-depth*.5)/.5))};
+  }
+  function thinkingSignalFrame(time,branches,state,random=Math.random){
+    if(time>=state.next){
+      const tips=branches.map((b,i)=>({b,i})).filter(({b,i})=>b.depth===6&&i!==state.lastLeaf);
+      const leaf=tips[Math.floor(random()*tips.length)].i,path=[];
+      for(let i=leaf;i>=0;i=branches[i].parent)path.unshift(i);
+      state.pulses.push({path,start:time,duration:.2+random()*.16});state.lastLeaf=leaf;
+      state.next=time+.55+random()*1.05;
+    }
+    state.pulses=state.pulses.filter(p=>time-p.start<p.path.length*p.duration+.4);
+    const signals=new Map();
+    for(const p of state.pulses){
+      const age=time-p.start,step=Math.floor(age/p.duration),travel=age/p.duration-step;
+      if(step>=0&&step<p.path.length)signals.set(p.path[step],{active:true,travel,flash:0});
+      const flash=Math.max(0,1-(age-p.path.length*p.duration)/.4);
+      if(age>=p.path.length*p.duration){const leaf=p.path.at(-1),existing=signals.get(leaf);signals.set(leaf,{active:existing?.active||false,travel:existing?.travel||0,flash:Math.max(existing?.flash||0,flash)});}
+    }
+    return signals;
   }
   function mountThinkingTree(art){
     art.removeAttribute('aria-hidden');
@@ -82,10 +98,12 @@
       body.append(g);return g;
     });
     let frame=0,visible=false,last=0,phase=0,pointer=null,pull=[0,0];
+    const signalState={next:3.5,pulses:[],lastLeaf:-1};
     const tick=now=>{
       frame=0;if(!visible||document.hidden)return;
       const dt=Math.min((now-(last||now))/1000,.04);last=now;phase+=dt;
       for(let k=0;k<2;k++)pull[k]+=((pointer?Math.max(-18,Math.min(18,(pointer[k]-[110,75][k])*.2)):0)-pull[k])*(1-Math.exp(-dt*7));
+      const signals=thinkingSignalFrame(phase,branches,signalState);
       const yaw=.35+Math.sin(phase*.23)*.42;
       const project=([x,y,z])=>{
         const xx=x*Math.cos(yaw)+z*Math.sin(yaw),zz=z*Math.cos(yaw)-x*Math.sin(yaw),scale=1.1*220/(220+zz);
@@ -95,7 +113,7 @@
       const rendered=branches.map((b,i)=>({b,i,a:project(b.start),z:project(b.end)}));
       rendered.sort((a,b)=>b.z[2]-a.z[2]);
       for(const {b,i,a,z} of rendered){
-        const g=pieces[i],w=Math.max(.65,7.5*Math.pow(.66,b.depth))*z[3],timing=thinkingTiming(phase,b.depth);
+        const g=pieces[i],w=Math.max(.65,7.5*Math.pow(.66,b.depth))*z[3],timing={...thinkingTiming(phase,b.depth),active:false,flash:0,...signals.get(i)};
         const d=`M${a[0]} ${a[1]} C${a[0]+b.bend} ${a[1]+(z[1]-a[1])*.4} ${z[0]-b.bend*.3} ${z[1]-(z[1]-a[1])*.22} ${z[0]} ${z[1]}`;
         [...g.children].slice(0,3).forEach((p,k)=>{p.setAttribute('d',d);p.setAttribute('stroke-dashoffset',1-timing.growth);p.setAttribute('stroke-width',w*[1,.7,.18][k]);p.setAttribute('transform',k===2?`translate(${-w*.15} ${-w*.1})`:'');});
         g.setAttribute('opacity',Math.max(.42,Math.min(1,.85-z[2]*.008)));
