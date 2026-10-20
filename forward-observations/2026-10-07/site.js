@@ -425,7 +425,7 @@
     if(!$$('p,li,figure,table',main).some(n=>!n.closest('form')&&text(n)))main.append(make('p','empty-page','Nothing published here yet.'));
   }
   // Shelf library model.
-  function shelfCapacity(width){return width>=1100?8:width>=700?6:4;}
+  function shelfCapacity(width){return width>=1100?12:width>=700?8:6;}
   function shelfPageFor(index,capacity){return Math.max(0,Math.floor(index/capacity));}
   function shelfDelay(index){return Math.min(455,index*65);}
   function matchShelfBooks(books,query){
