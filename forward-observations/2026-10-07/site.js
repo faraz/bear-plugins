@@ -128,6 +128,10 @@
     }
     return {points,bars,cables};
   }
+  function systemsAssembly(time,index){
+    const progress=Math.max(0,Math.min(1,(time-index*.22)/.8));
+    return {progress,remaining:Math.pow(1-progress,3),cables:Math.max(0,Math.min(1,(time-1.9)/.8))};
+  }
   function mountTensegrity(art){
     art.removeAttribute('aria-hidden');
     const svg=$('svg',art),body=$('.tensegrity-body',svg),{points,bars,cables}=tensegrityGeometry();
@@ -143,6 +147,7 @@
       }
       body.append(g);return {a,b,bar,g};
     };
+    const jointBars=points.map((_,i)=>bars.findIndex(pair=>pair.includes(i)));
     const members=[...cables.map(([a,b])=>line(a,b,false)),...bars.map(([a,b])=>line(a,b,true))];
     const joints=points.map(()=>{const c=document.createElementNS(ns,'circle');c.setAttribute('r','3.5');c.setAttribute('fill','#d9edf1');body.append(c);return c;});
     let frame=0,visible=false,last=0,phase=0,pointer=null,selected=-1,projected=[];
@@ -157,7 +162,12 @@
         const scale=40*4.8/(4.8+depth);
         return [110+xx*scale,90+yy*scale,depth];
       };
-      projected=points.map(project);
+      const assembly=bars.map((_,i)=>systemsAssembly(phase,i));
+      const assembled=points.map((point,i)=>{
+        const bar=bars[jointBars[i]],center=point.map((_,k)=>(points[bar[0]][k]+points[bar[1]][k])/2),remaining=assembly[jointBars[i]].remaining;
+        return point.map((v,k)=>v+remaining*(center[k]*.85+(k===2?1.3:0)));
+      });
+      projected=assembled.map(project);
       if(pointer)selected=projected.reduce((best,p,i)=>Math.hypot(p[0]-pointer[0],p[1]-pointer[1])<Math.hypot(projected[best][0]-pointer[0],projected[best][1]-pointer[1])?i:best,0);
       projected.forEach((p,i)=>{
         const weight=selected<0?0:i===selected?1:members.some(e=>(e.a===i&&e.b===selected)||(e.b===i&&e.a===selected))?.32:.1;
@@ -172,7 +182,7 @@
         if(e.bar){
           const axis=points[e.a].findIndex((v,k)=>v!==points[e.b][k]),cross=[0,1,2].filter(k=>k!==axis);
           const corners=[e.a,e.b].map(i=>[[ -1,-1],[1,-1],[1,1],[-1,1]].map(sign=>{
-            const v=points[i].slice();cross.forEach((k,j)=>v[k]+=sign[j]*.14);
+            const v=assembled[i].slice();cross.forEach((k,j)=>v[k]+=sign[j]*.14);
             const p=project(v);return [p[0]+offset[i][0],p[1]+offset[i][1],p[2]];
           }));
           const normals=cross.flatMap(k=>[-1,1].map(sign=>{const n=[0,0,0];n[k]=sign;return n;}));
@@ -189,9 +199,11 @@
           const l=e.g.firstChild;l.setAttribute('x1',a[0]);l.setAttribute('y1',a[1]);l.setAttribute('x2',b[0]);l.setAttribute('y2',b[1]);
         }
         const depth=(a[2]+b[2])/2;
-        e.g.setAttribute('opacity',e.bar?Math.max(.55,1-depth*.16):(selected===e.a||selected===e.b)?.9:Math.max(.16,.48-depth*.15));body.append(e.g);
+        const build=assembly[jointBars[e.a]];
+        if(!e.bar){e.g.firstChild.setAttribute('pathLength','1');e.g.firstChild.setAttribute('stroke-dasharray','1');e.g.firstChild.setAttribute('stroke-dashoffset',1-build.cables);}
+        e.g.setAttribute('opacity',e.bar?build.progress*Math.max(.55,Math.min(1,1-depth*.16)):build.cables*((selected===e.a||selected===e.b)?.9:Math.max(.16,.48-depth*.15)));body.append(e.g);
       });
-      joints.forEach((c,i)=>{c.setAttribute('cx',drawn[i][0]);c.setAttribute('cy',drawn[i][1]);c.setAttribute('r',3.5*4.8/(4.8+drawn[i][2]));c.setAttribute('opacity',Math.max(.3, .9-drawn[i][2]*.22));body.append(c);});
+      joints.forEach((c,i)=>{c.setAttribute('cx',drawn[i][0]);c.setAttribute('cy',drawn[i][1]);c.setAttribute('r',3.5*4.8/(4.8+drawn[i][2]));c.setAttribute('opacity',assembly[jointBars[i]].progress*Math.max(.3, .9-drawn[i][2]*.22));body.append(c);});
       frame=requestAnimationFrame(tick);
     };
     const start=()=>{last=0;if(visible&&!document.hidden&&!frame)frame=requestAnimationFrame(tick);};
