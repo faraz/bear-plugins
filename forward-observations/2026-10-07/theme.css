@@ -309,7 +309,7 @@ body>header .search-results{max-width:none;margin-bottom:0}
 .flap-half{position:absolute;left:0;width:100%;height:50%;overflow:hidden;background:#ded8ca;backface-visibility:hidden}
 .flap-top,.flap-front{top:0;border-radius:3px 3px 0 0;background:linear-gradient(#e9e4d9,#ded8ca);transform-origin:center bottom}
 .flap-bottom,.flap-back{bottom:0;border-radius:0 0 3px 3px;background:linear-gradient(#c9c3b6,#ded8ca);transform-origin:center top}
-.flap-glyph{position:absolute;left:0;width:100%;height:1.12em;line-height:1.12em;text-align:center}
+.flap-glyph{-webkit-text-stroke:.45px currentColor;position:absolute;left:0;width:100%;height:1.12em;line-height:1.12em;text-align:center}
 .flap-bottom .flap-glyph,.flap-back .flap-glyph{bottom:0}
 .flap-front,.flap-back{z-index:3}
 .flap-half[hidden]{display:none}

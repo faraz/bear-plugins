@@ -320,10 +320,10 @@
   function splitFlapWordmark(heading){
     if(!heading)return;
     heading.classList.add('split-flap');
-    heading.setAttribute('aria-label','Forward Observations');
+    heading.setAttribute('aria-label','forward observations');
     heading.replaceChildren();
     const tiles=[],alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    for(const word of ['Forward','Observations']){
+    for(const word of ['forward','observations']){
       const row=make('span','flap-row');row.setAttribute('aria-hidden','true');
       for(const target of word){
         const tile=make('span','flap-tile');
