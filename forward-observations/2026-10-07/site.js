@@ -425,7 +425,7 @@
     if(!$$('p,li,figure,table',main).some(n=>!n.closest('form')&&text(n)))main.append(make('p','empty-page','Nothing published here yet.'));
   }
   // Shelf library model.
-  function shelfCapacity(width){return width>=1100?16:width>=700?12:8;}
+  function shelfCapacity(width){return width>=1100?8:width>=700?6:4;}
   function shelfPageFor(index,capacity){return Math.max(0,Math.floor(index/capacity));}
   function shelfDelay(index){return Math.min(455,index*65);}
   function matchShelfBooks(books,query){
@@ -512,7 +512,7 @@
           if(subset[0])caption.textContent=subset[0].title;
           subset.forEach((book,i)=>{
             const a=external('',book.href||'#');a.replaceChildren();a.className='library-book';a.dataset.book=book.id;a.setAttribute('aria-label',`${book.title}${book.author?', '+book.author:''}. Open book details`);a.setAttribute('aria-haspopup','dialog');
-            const arrival=make('span','library-arrival'),v=visual(book,i===0);v.setAttribute('aria-hidden','true');arrival.append(v);a.append(arrival);
+            const arrival=make('span','library-arrival'),v=visual(book,true);v.setAttribute('aria-hidden','true');arrival.append(v);a.append(arrival);
 
             a.addEventListener('pointerenter',()=>caption.textContent=book.title);a.addEventListener('focus',()=>{caption.textContent=book.title;arrival.classList.remove('is-arriving');});
             a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();openShelfBook(book.id,'user',a);});slots.append(a);
