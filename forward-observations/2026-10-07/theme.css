@@ -319,11 +319,16 @@ body>header .search-results{max-width:none;margin-bottom:0}
 .stream-head{grid-template-columns:minmax(0,1fr) 172px}
 .stream-art{width:172px;height:150px}
 .section-signature{width:100%;height:100%;overflow:visible}
+.stream-art:has(.influence-network){pointer-events:auto}
+.system-trigger{cursor:pointer;outline:none}.system-trigger circle{fill:transparent;stroke:transparent;stroke-width:1.5}.system-trigger:focus-visible circle{stroke:#d7edf3;stroke-dasharray:2 3}
+.influence-network.is-interacting :is(.system-pulse,.system-response){visibility:hidden}
+.system-user-pulse,.system-user-response{pointer-events:none}
+
 .thought-canopy{transform-origin:110px 162px;animation:thought-sway 5s ease-in-out infinite alternate}.thought-skeleton{fill:none;stroke:#c7b79f;stroke-opacity:.65;stroke-width:var(--weight);stroke-linecap:round}
 .thought-branch{fill:none;stroke:#ead4ac;stroke-width:var(--weight);stroke-linecap:round;stroke-dasharray:1;animation:thought-grow 6s cubic-bezier(.3,0,.2,1) infinite;animation-delay:var(--delay)}
 .thought-bud{fill:#f4dfb7;animation:thought-bloom 6s ease infinite;animation-delay:var(--delay)}
-.system-link{fill:none;stroke:#9eb8c6;stroke-opacity:.7;stroke-width:1.5;stroke-linecap:round}
-.system-core{fill:#34525f;stroke:#c0dce6;stroke-width:1.5}.system-rim{fill:none;stroke:#e0eff3;stroke-width:1;stroke-linecap:round}.system-center{fill:#e3f4fa}
+.system-link{fill:none;stroke:#9eb8c6;stroke-opacity:.85;stroke-width:2;stroke-linecap:round}
+.system-core{fill:#456878;stroke:#c0dce6;stroke-width:1.5}.system-rim{fill:none;stroke:#e0eff3;stroke-width:1;stroke-linecap:round}.system-center{fill:#e3f4fa}
 .system-pulse{fill:#e3f4f7;opacity:0;animation-duration:8s;animation-timing-function:linear;animation-iteration-count:infinite}
 .system-response{fill:#bddce7;stroke:#d7edf3;stroke-width:.8;opacity:0;animation:network-response 8s cubic-bezier(.23,1,.32,1) infinite}
 .stream-head :is(.thought-canopy,.thought-branch,.thought-bud,.system-pulse,.system-response){animation-play-state:paused}
