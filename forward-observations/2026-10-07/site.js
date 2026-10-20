@@ -64,12 +64,20 @@
     };
     grow([0,68,0],-Math.PI/2,38,0,-1);return branches;
   }
+  function thinkingTiming(time,depth){
+    const growth=Math.max(0,Math.min(1,(time-depth*.5)/.5));
+    const wave=(time-3.5)%5,travel=(wave-depth*.28)/.28;
+    return {growth,travel,active:time>=3.5&&travel>=0&&travel<=1,flash:time>=3.5?Math.max(0,1-Math.abs(wave-(depth+1)*.28)/.35):0};
+  }
   function mountThinkingTree(art){
     art.removeAttribute('aria-hidden');
     const svg=$('svg',art),body=$('.thinking-body',svg),branches=thinkingGeometry(),ns='http://www.w3.org/2000/svg';
     const pieces=branches.map(branch=>{
       const g=document.createElementNS(ns,'g');
-      for(const color of ['#514534','#b9a17b','#f0dfba']){const p=document.createElementNS(ns,'path');p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-linecap','round');g.append(p);}
+      for(const color of ['#514534','#b9a17b','#f0dfba']){const p=document.createElementNS(ns,'path');p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-linecap','round');p.setAttribute('pathLength','1');p.setAttribute('stroke-dasharray','1');g.append(p);}
+      const pulse=document.createElementNS(ns,'g');pulse.setAttribute('class','thought-signal');
+      for(const [radius,color,opacity] of [[4,'#f6dca5',.3],[1.8,'#fff6dc',1]]){const dot=document.createElementNS(ns,'circle');dot.setAttribute('r',radius);dot.setAttribute('fill',color);dot.setAttribute('opacity',opacity);pulse.append(dot);}
+      g.append(pulse);
       if(branch.depth===6){const leaf=document.createElementNS(ns,'ellipse');leaf.setAttribute('fill','#e6d2a6');g.append(leaf);}
       body.append(g);return g;
     });
@@ -87,11 +95,17 @@
       const rendered=branches.map((b,i)=>({b,i,a:project(b.start),z:project(b.end)}));
       rendered.sort((a,b)=>b.z[2]-a.z[2]);
       for(const {b,i,a,z} of rendered){
-        const g=pieces[i],w=Math.max(.65,7.5*Math.pow(.66,b.depth))*z[3];
+        const g=pieces[i],w=Math.max(.65,7.5*Math.pow(.66,b.depth))*z[3],timing=thinkingTiming(phase,b.depth);
         const d=`M${a[0]} ${a[1]} C${a[0]+b.bend} ${a[1]+(z[1]-a[1])*.4} ${z[0]-b.bend*.3} ${z[1]-(z[1]-a[1])*.22} ${z[0]} ${z[1]}`;
-        [...g.children].slice(0,3).forEach((p,k)=>{p.setAttribute('d',d);p.setAttribute('stroke-width',w*[1,.7,.18][k]);p.setAttribute('transform',k===2?`translate(${-w*.15} ${-w*.1})`:'');});
+        [...g.children].slice(0,3).forEach((p,k)=>{p.setAttribute('d',d);p.setAttribute('stroke-dashoffset',1-timing.growth);p.setAttribute('stroke-width',w*[1,.7,.18][k]);p.setAttribute('transform',k===2?`translate(${-w*.15} ${-w*.1})`:'');});
         g.setAttribute('opacity',Math.max(.42,Math.min(1,.85-z[2]*.008)));
-        if(b.depth===6){const leaf=g.lastChild;leaf.setAttribute('cx',z[0]);leaf.setAttribute('cy',z[1]);leaf.setAttribute('rx',3.5*z[3]);leaf.setAttribute('ry',1.7*z[3]);leaf.setAttribute('transform',`rotate(${Math.atan2(z[1]-a[1],z[0]-a[0])*180/Math.PI} ${z[0]} ${z[1]})`);}
+        const pulse=$('.thought-signal',g);pulse.setAttribute('opacity',timing.active?1:0);
+        if(timing.active){
+          const t=timing.travel,u=1-t,c1=[a[0]+b.bend,a[1]+(z[1]-a[1])*.4],c2=[z[0]-b.bend*.3,z[1]-(z[1]-a[1])*.22];
+          const point=[0,1].map(k=>u*u*u*a[k]+3*u*u*t*c1[k]+3*u*t*t*c2[k]+t*t*t*z[k]);
+          pulse.setAttribute('transform',`translate(${point[0]} ${point[1]})`);
+        }
+        if(b.depth===6){const leaf=g.lastChild;leaf.setAttribute('opacity',timing.growth);leaf.setAttribute('fill',timing.flash>.2?'#fff1c7':'#e6d2a6');leaf.setAttribute('cx',z[0]);leaf.setAttribute('cy',z[1]);leaf.setAttribute('rx',(3.5+timing.flash*1.8)*z[3]);leaf.setAttribute('ry',(1.7+timing.flash)*z[3]);leaf.setAttribute('transform',`rotate(${Math.atan2(z[1]-a[1],z[0]-a[0])*180/Math.PI} ${z[0]} ${z[1]})`);}
         body.append(g);
       }
       frame=requestAnimationFrame(tick);
@@ -198,7 +212,7 @@
       const intro=$('.stream-intro',stream);
       const art=make('div','stream-art');art.setAttribute('aria-hidden','true');
       // Bespoke growth and kinetic section signatures.
-      art.innerHTML=["<svg class=\"section-signature thinking-tree\" viewBox=\"0 0 220 180\" role=\"img\" aria-label=\"Organic three-dimensional tree. Move the pointer to bend its connected branches.\"><defs><pattern id=\"thinking-pixels\" width=\"2.5\" height=\"2.5\" patternUnits=\"userSpaceOnUse\"><rect width=\"1.8\" height=\"1.8\" fill=\"white\"/><rect x=\"1.9\" y=\"1.9\" width=\".6\" height=\".6\" fill=\"white\"/></pattern><mask id=\"thinking-screen\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"240\" height=\"210\"><rect x=\"-10\" y=\"-10\" width=\"240\" height=\"210\" fill=\"url(#thinking-pixels)\"/></mask></defs><g class=\"dither-art\" mask=\"url(#thinking-screen)\" aria-hidden=\"true\"><g class=\"thinking-body\"></g></g></svg>", "<svg class=\"section-signature tensegrity\" viewBox=\"0 0 220 180\" role=\"img\" aria-label=\"Tensegrity sculpture: six blue struts suspended in tension cables. Move the pointer to gently deform the connected structure.\"><defs><pattern id=\"systems-pixels\" width=\"2.5\" height=\"2.5\" patternUnits=\"userSpaceOnUse\"><rect width=\"1.8\" height=\"1.8\" fill=\"white\"/><rect x=\"1.9\" y=\"1.9\" width=\".6\" height=\".6\" fill=\"white\"/></pattern><mask id=\"systems-screen\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"240\" height=\"210\"><rect x=\"-10\" y=\"-10\" width=\"240\" height=\"210\" fill=\"url(#systems-pixels)\"/></mask></defs><g class=\"dither-art\" mask=\"url(#systems-screen)\" aria-hidden=\"true\"><g class=\"tensegrity-body\"></g></g></svg>"][i];
+      art.innerHTML=["<svg class=\"section-signature thinking-tree\" viewBox=\"0 0 220 180\" role=\"img\" aria-label=\"Growing three-dimensional tree with branching neural signals. Move the pointer to bend its connected branches.\"><defs><pattern id=\"thinking-pixels\" width=\"2.5\" height=\"2.5\" patternUnits=\"userSpaceOnUse\"><rect width=\"1.8\" height=\"1.8\" fill=\"white\"/><rect x=\"1.9\" y=\"1.9\" width=\".6\" height=\".6\" fill=\"white\"/></pattern><mask id=\"thinking-screen\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"240\" height=\"210\"><rect x=\"-10\" y=\"-10\" width=\"240\" height=\"210\" fill=\"url(#thinking-pixels)\"/></mask></defs><g class=\"dither-art\" mask=\"url(#thinking-screen)\" aria-hidden=\"true\"><g class=\"thinking-body\"></g></g></svg>", "<svg class=\"section-signature tensegrity\" viewBox=\"0 0 220 180\" role=\"img\" aria-label=\"Tensegrity sculpture: six blue struts suspended in tension cables. Move the pointer to gently deform the connected structure.\"><defs><pattern id=\"systems-pixels\" width=\"2.5\" height=\"2.5\" patternUnits=\"userSpaceOnUse\"><rect width=\"1.8\" height=\"1.8\" fill=\"white\"/><rect x=\"1.9\" y=\"1.9\" width=\".6\" height=\".6\" fill=\"white\"/></pattern><mask id=\"systems-screen\" maskUnits=\"userSpaceOnUse\" x=\"-10\" y=\"-10\" width=\"240\" height=\"210\"><rect x=\"-10\" y=\"-10\" width=\"240\" height=\"210\" fill=\"url(#systems-pixels)\"/></mask></defs><g class=\"dither-art\" mask=\"url(#systems-screen)\" aria-hidden=\"true\"><g class=\"tensegrity-body\"></g></g></svg>"][i];
       if(i)mountTensegrity(art);else mountThinkingTree(art);
       const more=link(i?'All research':'All writing',i?'/research/':'/blog/');more.className='stream-more';
       const arrow=make('span','stream-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M3 13 13 3M3 3h10v10"/></svg>';more.append(arrow);
