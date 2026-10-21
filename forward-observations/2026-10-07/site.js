@@ -463,19 +463,24 @@
     if(!window.HTMLDialogElement)return;
     const books=readShelfBooks(root),byId=new Map(books.map(b=>[b.id,b]));
     const collections=[...new Set(books.map(b=>b.collection))].sort((a,b)=>a==='current'?-1:b==='current'?1:b.localeCompare(a));
-    const label=id=>id==='current'?'Currently reading':id==='undated'?'Reading archive':id;
+    const years=collections.filter(id=>id!=='current'),currentBooks=books.filter(b=>b.collection==='current');
+    const label=id=>id==='undated'?'Undated':id;
     const savedPages=new Map(),seen=new Set(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
-    let collection=collections.find(c=>/^\d{4}$/.test(c))||collections[0]||'current',capacity=shelfCapacity(innerWidth),page=0,results=[],query='',announceTimer,scrollFrame,resizeFrame;
+    let collection=collections.find(c=>/^\d{4}$/.test(c))||years[0]||'undated',capacity=shelfCapacity(innerWidth),page=0,results=[],query='',announceTimer,scrollFrame,resizeFrame;
     let selected=null,trigger=null,sourceVisual=null,flight=null,flightFrom=null,flightTo=null,progress=0,velocity=0,target=1,frame=0,last=0,returnFocus=null,scrollYBefore=0,oldOverflow='',historyPending=false;
     const token='shelf-'+Math.random().toString(36).slice(2);
-    const ui=make('div','library'),toolbar=make('div','library-toolbar'),choices=make('div','library-collections');choices.setAttribute('role','group');choices.setAttribute('aria-label','Book collections');
+    const ui=make('div','library'),toolbar=make('div','library-toolbar'),choices=make('div','library-collections');choices.setAttribute('role','group');choices.setAttribute('aria-label','Year read');
+    const currentSection=make('section','library-current'),currentHead=make('div','library-section-head'),currentTitle=make('h2','','Currently Reading'),currentShelves=make('div','library-current-shelves');
+    currentHead.append(currentTitle,make('span','library-section-count',`${currentBooks.length} ${currentBooks.length===1?'book':'books'}`));currentSection.append(currentHead,currentShelves);
+    const archive=make('section','library-archive'),archiveHead=make('div','library-section-head'),archiveTitle=make('h2','','Already Read'),archiveCount=make('span','library-section-count');
+    archiveHead.append(archiveTitle,archiveCount,choices);
     const searchLabel=make('label','library-search'),search=make('input');search.type='search';search.placeholder='Find a book';search.setAttribute('aria-label','Find a book by title or author');searchLabel.append(search);
     const track=make('div','library-track');track.id='library-track';track.setAttribute('aria-label','Books');
     const empty=make('div','library-empty'),clear=make('button','','Clear search');clear.type='button';
     const pagination=make('div','library-pagination'),prev=make('button','','← Previous'),next=make('button','','Next →'),range=make('span','library-range');
     [prev,next].forEach(b=>{b.type='button';b.setAttribute('aria-controls',track.id);});
     const status=make('span','library-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-    pagination.append(prev,range,next);toolbar.append(choices,searchLabel);ui.append(toolbar,track,empty,pagination,status);
+    pagination.append(prev,range,next);toolbar.append(searchLabel);archive.append(archiveHead,track,empty,pagination);ui.append(toolbar,currentSection,archive,status);
     const dialog=make('dialog','library-dialog');dialog.setAttribute('aria-labelledby','library-book-title');
     const panel=make('div','library-detail'),close=make('button','library-close','Close ×');close.type='button';close.setAttribute('aria-label','Close book details');
     const coverStage=make('div','library-detail-art'),copy=make('div','library-detail-copy'),meta=make('p','library-detail-meta'),title=make('h2');title.id='library-book-title';
@@ -491,6 +496,7 @@
     function syncPage(){
       page=currentPage();if(!query)savedPages.set(collection,page);
       [...track.children].forEach((group,i)=>{const inactive=i!==page;if(inactive&&group.contains(document.activeElement))next.focus({preventScroll:true});group.inert=inactive;group.setAttribute('aria-hidden',String(inactive));if(!inactive){$$('.library-book',group).forEach((a,index)=>{if(!seen.has(a.dataset.book)){seen.add(a.dataset.book);const arrival=$('.library-arrival',a);if(!reduced.matches){arrival.style.setProperty('--arrival-delay',shelfDelay(index)+'ms');arrival.classList.add('is-arriving');}}});}});
+      if(!currentSection.hidden)$$('.library-book',currentShelves).forEach((a,index)=>{if(!seen.has(a.dataset.book)){seen.add(a.dataset.book);if(!reduced.matches){const arrival=$('.library-arrival',a);arrival.style.setProperty('--arrival-delay',shelfDelay(index)+'ms');arrival.classList.add('is-arriving');}}});
       range.textContent=results.length?`${page*capacity+1}–${Math.min(results.length,(page+1)*capacity)} of ${results.length}`:'0 books';
       prev.disabled=page===0;next.disabled=(page+1)*capacity>=results.length;pagination.hidden=results.length<=capacity;
     }
@@ -499,8 +505,23 @@
       if(track.children[n]){track.children[n].inert=false;track.children[n].removeAttribute('aria-hidden');}
       track.scrollTo({left:n*track.clientWidth,behavior:reduced.matches?'instant':'smooth'});
     }
+    function shelfRow(subset,perRow){
+      const row=make('div','library-row'),slots=make('div','library-slots');
+      slots.style.setProperty('--row-count',subset.length);slots.style.setProperty('--row-fraction',subset.length/perRow);
+      subset.forEach((book,i)=>{
+        const a=external('',book.href||'#');a.replaceChildren();a.className='library-book';a.dataset.book=book.id;a.setAttribute('aria-label',`${book.title}${book.author?', '+book.author:''}. Open book details`);a.setAttribute('aria-haspopup','dialog');
+        const arrival=make('span','library-arrival'),v=visual(book,true);v.setAttribute('aria-hidden','true');arrival.append(v);const caption=make('span','library-book-title',book.title);if(query)caption.append(make('small','library-result-status',book.collection==='current'?'Currently Reading':`Read in ${label(book.collection)}`));a.append(arrival,caption);
+
+        a.addEventListener('focus',()=>arrival.classList.remove('is-arriving'));
+        a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();openShelfBook(book.id,'user',a);});slots.append(a);
+      });
+      row.append(slots,make('span','library-ledge'));return row;
+    }
     function render(){
-      results=query?matchShelfBooks(books,query):books.filter(b=>b.collection===collection);
+      results=query?matchShelfBooks(books,query):books.filter(b=>b.collection===collection&&b.collection!=='current');
+      currentSection.hidden=!!query||!currentBooks.length;archiveTitle.textContent=query?'Search Results':'Already Read';archiveCount.textContent=`${results.length} ${results.length===1?'book':'books'}`;choices.hidden=!!query;
+      currentShelves.replaceChildren();const currentColumns=capacity/2;
+      if(!query)for(let i=0;i<currentBooks.length;i+=currentColumns)currentShelves.append(shelfRow(currentBooks.slice(i,i+currentColumns),currentColumns));
       page=Math.min(query?page:(savedPages.get(collection)||0),Math.max(0,Math.ceil(results.length/capacity)-1));
       track.replaceChildren();choices.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!query&&b.dataset.collection===collection)));
       const perRow=capacity/2,rows=Math.min(2,Math.ceil(Math.min(capacity,results.length)/perRow));track.style.setProperty('--library-rows',rows||1);track.style.setProperty('--library-columns',perRow);
@@ -510,32 +531,23 @@
         for(let r=0;r<rows;r++){
           const subset=results.slice(offset+r*rowSize,Math.min(offset+(r+1)*rowSize,offset+capacity));
           if(!subset.length)continue;
-          const row=make('div','library-row'),slots=make('div','library-slots');
-          slots.style.setProperty('--row-count',subset.length);slots.style.setProperty('--row-fraction',subset.length/perRow);
-          subset.forEach((book,i)=>{
-            const a=external('',book.href||'#');a.replaceChildren();a.className='library-book';a.dataset.book=book.id;a.setAttribute('aria-label',`${book.title}${book.author?', '+book.author:''}. Open book details`);a.setAttribute('aria-haspopup','dialog');
-            const arrival=make('span','library-arrival'),v=visual(book,true);v.setAttribute('aria-hidden','true');arrival.append(v);a.append(arrival,make('span','library-book-title',book.title));
-
-            a.addEventListener('focus',()=>arrival.classList.remove('is-arriving'));
-            a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();openShelfBook(book.id,'user',a);});slots.append(a);
-          });
-          row.append(slots,make('span','library-ledge'));group.append(row);
+          group.append(shelfRow(subset,perRow));
         }track.append(group);
       }
       empty.replaceChildren();empty.hidden=results.length>0;
       if(!results.length){empty.append(make('p','',query?`No books match “${query}”`:'Your reading archive is waiting.'));if(query)empty.append(clear);}
       track.hidden=!results.length;track.scrollLeft=page*track.clientWidth;syncPage();
     }
-    collections.forEach(id=>{const b=make('button','',label(id));b.type='button';b.dataset.collection=id;b.append(make('span','library-count',String(books.filter(book=>book.collection===id).length)));b.addEventListener('click',()=>{collection=id;query='';search.value='';page=savedPages.get(id)||0;render();const u=new URL(location.href);u.searchParams.set('shelf',id);u.searchParams.delete('book');history.replaceState({...history.state},'',u);});choices.append(b);});
+    years.forEach(id=>{if(years.length===1){choices.append(make('span','library-year',label(id)));return;}const b=make('button','',label(id));b.type='button';b.dataset.collection=id;b.append(make('span','library-count',String(books.filter(book=>book.collection===id).length)));b.addEventListener('click',()=>{collection=id;query='';search.value='';page=savedPages.get(id)||0;render();const u=new URL(location.href);u.searchParams.set('shelf',id);u.searchParams.delete('book');history.replaceState({...history.state},'',u);});choices.append(b);});
     prev.addEventListener('click',()=>goPage(page-1));next.addEventListener('click',()=>goPage(page+1));
     track.addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(()=>{scrollFrame=0;syncPage();});},{passive:true});
     function searchChanged(){query=search.value.trim();page=0;render();clearTimeout(announceTimer);announceTimer=setTimeout(()=>status.textContent=`${results.length} books found`,200);}
     search.addEventListener('input',searchChanged);clear.addEventListener('click',()=>{search.value='';searchChanged();search.focus();});
-    function sourceFor(id){return [...track.querySelectorAll('.library-book')].find(a=>a.dataset.book===id);}
+    function sourceFor(id){return [...ui.querySelectorAll('.library-book')].find(a=>a.dataset.book===id&&!a.closest('[hidden]'));}
     function cleanupFlight(){cancelAnimationFrame(frame);frame=0;last=0;flight?.remove();flight=null;if(sourceVisual)sourceVisual.style.visibility='';sourceVisual=null;coverStage.style.visibility='';}
     function finishShelfMotion(){
       cleanupFlight();dialog.classList.remove('is-transitioning');
-      if(target===0&&dialog.open){dialog.close();document.documentElement.style.overflow=oldOverflow;window.scrollTo({top:scrollYBefore,behavior:'instant'});const f=returnFocus?.isConnected&&!returnFocus.closest('[inert]')?returnFocus:choices.querySelector('button');f?.focus({preventScroll:true});selected=null;}
+      if(target===0&&dialog.open){dialog.close();document.documentElement.style.overflow=oldOverflow;window.scrollTo({top:scrollYBefore,behavior:'instant'});const f=returnFocus?.isConnected&&!returnFocus.closest('[inert]')?returnFocus:search;f?.focus({preventScroll:true});selected=null;}
     }
     function animateShelfBook(direction){
       target=direction==='detail'?1:0;
@@ -580,8 +592,8 @@
     let scrimDown=false;dialog.addEventListener('pointerdown',e=>scrimDown=e.target===dialog);dialog.addEventListener('click',e=>{if(scrimDown&&e.target===dialog)closeShelfBook('user');scrimDown=false;});
     function fromLocation(){
       historyPending=false;const state=readShelfLocation(new URL(location.href),books);
-      if(state.bookId){const book=byId.get(state.bookId);query='';search.value='';collection=book.collection;const index=books.filter(b=>b.collection===collection).indexOf(book);savedPages.set(collection,shelfPageFor(index,capacity));render();openShelfBook(book.id,'history');}
-      else {if(dialog.open)closeShelfBook('history');if(state.collection&&state.collection!==collection){collection=state.collection;render();}if(new URL(location.href).searchParams.has('book')){const u=new URL(location.href);u.searchParams.delete('book');history.replaceState(history.state,'',u);}}
+      if(state.bookId){const book=byId.get(state.bookId);query='';search.value='';if(book.collection!=='current')collection=book.collection;const index=books.filter(b=>b.collection===collection).indexOf(book);savedPages.set(collection,shelfPageFor(index,capacity));render();openShelfBook(book.id,'history');}
+      else {if(dialog.open)closeShelfBook('history');if(state.collection&&state.collection!=='current'&&state.collection!==collection){collection=state.collection;render();}if(new URL(location.href).searchParams.has('book')){const u=new URL(location.href);u.searchParams.delete('book');history.replaceState(history.state,'',u);}}
     }
     window.addEventListener('popstate',fromLocation);
     window.addEventListener('resize',()=>{if(!resizeFrame)resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;if(frame)finishShelfMotion();const c=shelfCapacity(innerWidth);if(c===capacity)return;const focused=document.activeElement?.closest('.library-book')?.dataset.book,first=focused?Math.max(0,results.findIndex(b=>b.id===focused)):page*capacity;capacity=c;if(query)page=shelfPageFor(first,c);else savedPages.set(collection,shelfPageFor(first,c));render();if(focused)sourceFor(focused)?.focus({preventScroll:true});});});
