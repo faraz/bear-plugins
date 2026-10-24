@@ -1,0 +1,29 @@
+name: Bookshelf regression
+on:
+  pull_request:
+    paths:
+      - 'forward-observations/2026-10-07/**'
+      - '.github/workflows/bookshelf.yml'
+  push:
+    branches: ['codex/bookshelf-style-audit']
+    paths:
+      - 'forward-observations/2026-10-07/**'
+      - '.github/workflows/bookshelf.yml'
+permissions:
+  contents: read
+jobs:
+  bookshelf:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forward-observations/2026-10-07
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: forward-observations/2026-10-07/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
