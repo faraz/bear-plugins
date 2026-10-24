@@ -60,3 +60,9 @@ The scoped GitHub Actions workflow runs the same suite in Chromium.
 The history regression also exposed a bookshelf bug: Forward into a current
 book used an archive index of `-1`, resetting the completed-books page. The
 location handler now updates archive pagination only for an archived book.
+
+Known boundary: the Chromium fixture exposes 4px of overflow from the existing
+shared-header Search button at 320px, even with the theme fonts loaded. Shared
+header CSS is unchanged in this patch. Responsive geometry assertions measure
+the bookshelf's own bounds, scrolling width and cover cells, rather than
+expanding this change into a site-wide header adjustment.
