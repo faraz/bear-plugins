@@ -171,7 +171,14 @@ for (const [width, capacity] of [[320, 6], [390, 6], [699, 6], [700, 8], [1099, 
     await expect(page.locator('.library-current .library-book')).toHaveCount(2);
     await page.getByRole('button', { name: '← Previous' }).click();
     await expect(page.locator('.library-range')).toHaveText(`1–${capacity} of 14`);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const overflow = await page.evaluate(() => ({
+      width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
+      elements: [...document.querySelectorAll('body *')].filter(element => {
+        const box = element.getBoundingClientRect();
+        return box.width > 0 && box.right > innerWidth + 1 && !element.closest('[inert], [hidden]');
+      }).map(element => ({ tag: element.tagName, class: element.className, right: element.getBoundingClientRect().right }))
+    }));
+    expect(overflow.scrollWidth, JSON.stringify(overflow)).toBeLessThanOrEqual(width);
     await expect.poll(() => activeBooks(page).evaluateAll(books => books.every(book => book.querySelector('img')?.naturalWidth > 0))).toBe(true);
     // Covers and captions must fit their own cells, not merely a clipped viewport.
     const fits = await activeBooks(page).evaluateAll(books => books.every(book => {
