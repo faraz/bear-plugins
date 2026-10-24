@@ -4,6 +4,10 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const origin = 'http://bookshelf.test';
+const fontAliases = {
+  'X6XYTKIVDUW7GZTZPZNN4EUM5KH54KHF.woff2': 'satoshi-normal.woff2',
+  'E3NEPGEAHYCHR37DSBXHV33XCYYRE2CY.woff2': 'satoshi-italic.woff2'
+};
 
 // Exercise the complete shipped script and stylesheet with Bear's source markup.
 function fixture({ archiveCount = 7, older = false, currentCount = 2 } = {}) {
@@ -40,13 +44,20 @@ async function mount(page, { width = 1280, reducedMotion = 'reduce', query = '',
       const width = url.pathname.endsWith('-2.svg') ? 160 : 130;
       return route.fulfill({ contentType: 'image/svg+xml', body: `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="200"><rect width="${width}" height="200" fill="#39433f"/></svg>` });
     }
-    const font = path.join(root, 'fonts', path.basename(url.pathname));
-    if (url.pathname.endsWith('.woff2') && fs.existsSync(font)) return route.fulfill({ path: font });
+    const filename = path.basename(url.pathname);
+    const font = path.join(root, 'fonts', fontAliases[filename] || filename);
+    if (url.pathname.endsWith('.woff2') && fs.existsSync(font)) return route.fulfill({ path: font, contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' } });
     return route.abort();
   });
   await page.goto(origin + '/books/' + query);
   if (enhanced) await expect(page.locator('.library')).toBeVisible();
-  await page.evaluate(() => document.fonts.ready);
+  const loaded = await page.evaluate(async () => {
+    const fonts = ['16px Satoshi', '14px "Departure Mono"', '16px "IBM Plex Sans"'];
+    await Promise.all(fonts.map(font => document.fonts.load(font)));
+    await document.fonts.ready;
+    return fonts.map(font => document.fonts.check(font));
+  });
+  expect(loaded).toEqual([true, true, true]);
 }
 
 const activeBooks = page => page.locator('.library-track .library-page:not([inert]) .library-book');
