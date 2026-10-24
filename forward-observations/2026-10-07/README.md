@@ -43,9 +43,12 @@ npm test
 ```
 
 Tests load the complete local `site.js` and `theme.css` against controlled Bear
-markup. Requests are intercepted: fonts come from the checkout, cover images
-are local SVG responses with differing proportions, and decorative background
-imports are stubbed. No live blog or account is changed.
+markup. Cover images are intercepted SVG responses with differing proportions;
+decorative background imports are stubbed. Repository fonts are served locally.
+The only external browser requests allowed are the two Satoshi Fontshare URLs
+already in `theme.css` (those binaries are not in the repository). Font loading
+is asserted before geometry checks; the suite requires those CDN assets to be
+reachable. No live blog or account is changed.
 
 Coverage includes current/archive membership and styles; cross-status search,
 accent-insensitive author matching and empty results; keyboard details, safe
