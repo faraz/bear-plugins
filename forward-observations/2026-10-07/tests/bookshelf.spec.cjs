@@ -4,14 +4,13 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const origin = 'http://bookshelf.test';
-const cover = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="140" height="200"><rect width="140" height="200" fill="#39433f"/></svg>');
 
 // Exercise the complete shipped script and stylesheet with Bear's source markup.
 function fixture({ archiveCount = 7, older = false, currentCount = 2 } = {}) {
   function book(id, title, author) {
     return `<article class="shelf-book" data-book-id="${id}">
       <a class="shelf-book-link" href="https://example.com/${id}">
-        <span class="shelf-cover"><img src="${cover}" alt=""></span>
+        <span class="shelf-cover"><img src="/covers/${id}.svg" alt=""></span>
         <h2>${title}</h2><p class="book-author">${author}</p>
         <span class="book-link-label">View book</span>
       </a><p class="book-note"><a href="/notes/${id}">Read notes</a></p>
@@ -37,6 +36,10 @@ async function mount(page, { width = 1280, reducedMotion = 'reduce', query = '',
     if (url.origin === origin && ['/theme.css', '/site.js'].includes(url.pathname)) return route.fulfill({ path: path.join(root, url.pathname.slice(1)) });
     // Decorative background modules are unrelated; no live requests or analytics.
     if (url.origin === origin && url.pathname === '/background.js') return route.fulfill({ contentType: 'text/javascript', body: '' });
+    if (url.origin === origin && url.pathname.startsWith('/covers/')) {
+      const width = url.pathname.endsWith('-2.svg') ? 160 : 130;
+      return route.fulfill({ contentType: 'image/svg+xml', body: `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="200"><rect width="${width}" height="200" fill="#39433f"/></svg>` });
+    }
     const font = path.join(root, 'fonts', path.basename(url.pathname));
     if (url.pathname.endsWith('.woff2') && fs.existsSync(font)) return route.fulfill({ path: font });
     return route.abort();
@@ -139,6 +142,22 @@ test('deep links reveal the right archive page and tolerate unknown book IDs', a
   await expect(page.locator('.library-current')).toBeVisible();
 });
 
+test('Forward into a current book does not reset the completed-books page', async ({ page }) => {
+  await mount(page, { width: 390, archiveCount: 14 });
+  await page.getByRole('button', { name: 'Next →' }).click();
+  await expect(page.locator('.library-range')).toHaveText('7–12 of 14');
+  await bookLink(page, 'current-1').click();
+  await page.goBack();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.locator('.library-range')).toHaveText('7–12 of 14');
+  await page.goForward();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.locator('.library-range')).toHaveText('7–12 of 14');
+  await expect(bookLink(page, 'current-1')).toBeFocused();
+});
+
 for (const [width, capacity] of [[320, 6], [390, 6], [699, 6], [700, 8], [1099, 8], [1100, 12], [1440, 12]]) {
   test(`pagination at ${width}px exposes ${capacity} books and keeps other pages inert`, async ({ page }) => {
     await mount(page, { width, archiveCount: 14 });
@@ -153,6 +172,7 @@ for (const [width, capacity] of [[320, 6], [390, 6], [699, 6], [700, 8], [1099, 
     await page.getByRole('button', { name: '← Previous' }).click();
     await expect(page.locator('.library-range')).toHaveText(`1–${capacity} of 14`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect.poll(() => activeBooks(page).evaluateAll(books => books.every(book => book.querySelector('img')?.naturalWidth > 0))).toBe(true);
     // Covers and captions must fit their own cells, not merely a clipped viewport.
     const fits = await activeBooks(page).evaluateAll(books => books.every(book => {
       const cell = book.getBoundingClientRect(), cover = book.querySelector('.library-volume').getBoundingClientRect();
