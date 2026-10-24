@@ -1,0 +1,10 @@
+{
+  "name": "forward-observations-regression-tests",
+  "private": true,
+  "scripts": {
+    "test": "playwright test tests/bookshelf.spec.cjs --workers=1"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

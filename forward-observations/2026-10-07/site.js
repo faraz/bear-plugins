@@ -592,7 +592,15 @@
     let scrimDown=false;dialog.addEventListener('pointerdown',e=>scrimDown=e.target===dialog);dialog.addEventListener('click',e=>{if(scrimDown&&e.target===dialog)closeShelfBook('user');scrimDown=false;});
     function fromLocation(){
       historyPending=false;const state=readShelfLocation(new URL(location.href),books);
-      if(state.bookId){const book=byId.get(state.bookId);query='';search.value='';if(book.collection!=='current')collection=book.collection;const index=books.filter(b=>b.collection===collection).indexOf(book);savedPages.set(collection,shelfPageFor(index,capacity));render();openShelfBook(book.id,'history');}
+      if(state.bookId){
+        const book=byId.get(state.bookId);query='';search.value='';
+        if(book.collection!=='current'){
+          collection=book.collection;
+          const index=books.filter(b=>b.collection===collection).indexOf(book);
+          savedPages.set(collection,shelfPageFor(index,capacity));
+        }
+        render();openShelfBook(book.id,'history');
+      }
       else {if(dialog.open)closeShelfBook('history');if(state.collection&&state.collection!=='current'&&state.collection!==collection){collection=state.collection;render();}if(new URL(location.href).searchParams.has('book')){const u=new URL(location.href);u.searchParams.delete('book');history.replaceState(history.state,'',u);}}
     }
     window.addEventListener('popstate',fromLocation);
@@ -654,3 +662,4 @@
   splitFlapWordmark($('.home-hero .masthead'));
   const footer=$('body>footer');if(footer){const directive=$('#footer-directive',footer);if(directive&&!text(directive))directive.remove();const credit=$('a[href="https://bearblog.dev"]',footer)?.parentElement;if(credit)credit.classList.add('bear-credit');const intro=make('span','','Independent writing & research');const links=make('div','footer-links');links.append(link('Subscribe ↗','/subscribe/'),link('RSS ↗','/feed/'));footer.prepend(intro,links);}
 })();
+
