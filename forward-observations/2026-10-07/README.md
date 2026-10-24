@@ -17,6 +17,8 @@ and computed styles. The live page loads that exact script commit. Its two
 current books and seven books read in 2026 have distinct headings; the archive
 has a top rule and the current shelves use a grid. At 1280px, the archive has
 balanced rows of four and three books with no document overflow.
+At 390px, it shows six archived books per page, retains both current books,
+and has no document overflow.
 
 The appended component starts at `/* Compact personal library. */` and preserves
 the deployed rules, including subsequent cover and reading-status refinements:
@@ -51,3 +53,7 @@ outbound links, focus restoration, Back/Forward and deep links; year selection;
 6/8/12-book pagination at 320, 390, 699, 700, 1099, 1100 and 1440px; focus across
 breakpoint changes; reduced motion; and the no-dialog source fallback.
 The scoped GitHub Actions workflow runs the same suite in Chromium.
+
+The history regression also exposed a bookshelf bug: Forward into a current
+book used an archive index of `-1`, resetting the completed-books page. The
+location handler now updates archive pagination only for an archived book.

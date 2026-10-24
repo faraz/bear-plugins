@@ -19,7 +19,7 @@ function fixture({ archiveCount = 7, older = false, currentCount = 2 } = {}) {
   const current = [book('current-1', 'Distributed Systems', 'Fiodar Sazanavets'), book('current-2', 'AI Systems Performance Engineering', 'Chris Fregly')].slice(0, currentCount).join('');
   const archive = Array.from({ length: archiveCount }, (_, i) => book(`read-${i + 1}`, `Systems Volume ${i + 1}`, i === 6 ? 'François Chollet' : `Author ${i + 1}`)).join('');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bookshelf fixture</title><link rel="stylesheet" href="/theme.css"><script src="/site.js" defer></script></head>
-    <body><header><a class="title" href="/">Forward Observations</a><nav></nav></header><main>
+    <body><header><a class="title" href="/"><h1>forward observations</h1></a><nav></nav></header><main>
     <section class="bookshelf bookshelf-dimensional"><header class="shelf-intro"><h1>Bookshelf</h1><p>Books, notes, and ideas worth returning to.</p></header>
       <section class="shelf-year shelf-current"><h2>Currently reading</h2><div class="shelf-catalogue">${current}</div></section>
       <section class="shelf-year" data-read-year="2026"><h2>2026</h2><div class="shelf-catalogue">${archive}</div></section>
