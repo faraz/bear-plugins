@@ -246,7 +246,7 @@
       if(i)mountTensegrity(art);else mountThinkingTree(art);
       const more=link(i?'All Research':'All Writing',i?'/research/':'/blog/');more.className='stream-more';
       const arrow=make('span','stream-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M3 13 13 3M3 3h10v10"/></svg>';more.append(arrow);
-      h.before(head);head.append(h,art);if(intro)head.append(intro);if(i){const links=make('div');links.style.cssText='grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px 28px';const systems=link('All Systems','/blog/?q=systems');systems.className='stream-more';systems.append(arrow.cloneNode(true));links.append(systems,more);head.append(links);}else head.append(more);streamHeads.push(head);
+      h.before(head);head.append(h,art);if(intro)head.append(intro);if(i){const links=make('div');links.style.cssText='grid-column:1;display:flex;flex-wrap:wrap;gap:8px 28px';const systems=link('All Systems','/blog/?q=systems');systems.className='stream-more';systems.append(arrow.cloneNode(true));links.append(systems,more);head.append(links);}else head.append(more);streamHeads.push(head);
     });
     const streamObserver=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
       target.dataset.visible=String(isIntersecting);target.classList.toggle('is-moving',isIntersecting&&!document.hidden);
