@@ -7,8 +7,8 @@
   const make = (tag, className, content) => { const n = document.createElement(tag); if (className) n.className = className; if (content) n.textContent = content; return n; };
   const link = (label, href) => { const a = make('a', '', label); a.href = href; return a; };
   const main = $('main'); if (!main) return;
-  import(new URL('background.js', document.currentScript.src).href).catch(() => {});
-  if ($('.research-card__media')) import(new URL('research-backgrounds.js', document.currentScript.src).href).catch(() => {});
+  import('https://cdn.jsdelivr.net/gh/faraz/bear-plugins@5579db83e5f4ab2e31ce9ffcc33b53596bce19cb/forward-observations/2026-10-07/background.js').catch(() => {});
+  if ($('.research-card__media')) import('https://cdn.jsdelivr.net/gh/faraz/bear-plugins@5579db83e5f4ab2e31ce9ffcc33b53596bce19cb/forward-observations/2026-10-07/research-backgrounds.js').catch(() => {});
   main.id ||= 'main-content'; main.tabIndex = -1;
   const skip = link('Skip to content', '#'+main.id); skip.className='skip-link'; document.body.prepend(skip);
   $$('a[href^="//blog//"]').forEach(a=>a.setAttribute('href',a.getAttribute('href').replace('//blog//','/blog/')));
