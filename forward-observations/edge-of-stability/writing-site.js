@@ -278,7 +278,7 @@
     document.addEventListener('visibilitychange',()=>streamHeads.forEach(head=>head.classList.toggle('is-moving',head.dataset.visible==='true'&&!document.hidden)));
 
     // Homepage and Writing cards consume the same editorial description.
-    $$('.stream:nth-child(2) .blog-posts li',main).forEach(row=>{
+    $$('.stream .blog-posts li',main).forEach(row=>{
       const anchor=$('a',row);const entry=anchor&&editorial[new URL(anchor.href,location.href).pathname];
       if(entry?.summary)row.append(make('p','systems-stream__dek',entry.summary));
     });
