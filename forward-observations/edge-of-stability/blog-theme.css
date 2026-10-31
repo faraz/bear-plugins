@@ -1,0 +1,14 @@
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans.woff2');font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans-semibold.woff2');font-weight:600;font-display:swap}
+:root{color-scheme:dark;--paper:#111416;--ink:#f1f0e9;--muted:#a5afb3;--line:#394348;--green:#b6d4c0;background:var(--paper)}
+html,body{background:var(--paper);color:var(--ink);scrollbar-color:var(--line) var(--paper)}
+::selection{background:var(--green);color:var(--paper)}
+.figure-page main{padding:24px 0 12px;border-block:1px solid var(--line)}
+.figure-page h1{font-weight:600;letter-spacing:-.025em}
+button,legend,.scrub-label{font-family:"IBM Plex Sans",sans-serif}
+button{border-radius:0;background:#1a1f22;font-weight:600}
+button[aria-pressed=true],button.primary{background:#1a1f22;color:var(--green);border-color:var(--green)}
+button:disabled{opacity:.65}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--green);outline-offset:5px}
+.state,output{font-variant-numeric:tabular-nums}
+@media(hover:hover){button:hover:not(:disabled){background:var(--line)}}
