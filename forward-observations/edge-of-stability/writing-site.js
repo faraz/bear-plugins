@@ -231,6 +231,29 @@
     document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else start();});
     window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);frame=0;});
   }
+  const editorial={
+  "/training-at-the-edge-of-stability/": {
+    "summary": "Large training steps can trigger oscillations that also push the model toward lower curvature. Whether training keeps improving depends on that feedback.",
+    "minutes": 10
+  },
+  "/input-output-metrics-management/": {
+    "summary": "Input metrics guide action, but their link to outcomes is a hypothesis. How to test that model, expose misleading targets, and know when to revise it.",
+    "minutes": 7
+  },
+  "/love-the-plateau/": {
+    "summary": "Why progress in complex skills happens in plateaus, not steady gains, and the three mechanisms that can allow people to persist when visible feedback disappears.",
+    "minutes": 4
+  },
+  "/choosing-problems-that-compound/": {
+    "summary": "How the problems you choose shape the trust you earn and the responsibility that follows.",
+    "minutes": 3
+  },
+  "/the-logic-most-advice-skips/": {
+    "summary": "Necessary, sufficient, or helpful: the distinctions that make a promise worth testing.",
+    "minutes": 1
+  }
+}
+;
   if(document.body.classList.contains('home')){
     const hero=make('section','home-hero');const identity=make('div','home-identity');const masthead=make('h1','masthead');masthead.append('forward',document.createElement('br'),'observations');identity.append(masthead);
     const tagline=$('.hero-title');if(tagline)identity.append(tagline);
@@ -254,6 +277,11 @@
     streamHeads.forEach(head=>streamObserver.observe(head));
     document.addEventListener('visibilitychange',()=>streamHeads.forEach(head=>head.classList.toggle('is-moving',head.dataset.visible==='true'&&!document.hidden)));
 
+    // Homepage and Writing cards consume the same editorial description.
+    $$('.stream:nth-child(2) .blog-posts li',main).forEach(row=>{
+      const anchor=$('a',row);const entry=anchor&&editorial[new URL(anchor.href,location.href).pathname];
+      if(entry?.summary)row.append(make('p','systems-stream__dek',entry.summary));
+    });
     const shell=$('[data-systems-mixed-stream]');
     if(shell){
       const initial=$$('.blog-posts li',shell).filter(li=>$('a',li));
@@ -356,29 +384,6 @@
     const list=$('.blog-posts',main);
     if(list){
       document.body.classList.add('writing-index');
-      const editorial={
-  "/training-at-the-edge-of-stability/": {
-    "summary": "Large training steps can trigger oscillations that also push the model toward lower curvature. Whether training keeps improving depends on that feedback.",
-    "minutes": 10
-  },
-  "/input-output-metrics-management/": {
-    "summary": "Input metrics guide action, but their link to outcomes is a hypothesis. How to test that model, expose misleading targets, and know when to revise it.",
-    "minutes": 7
-  },
-  "/love-the-plateau/": {
-    "summary": "Why progress in complex skills happens in plateaus, not steady gains, and the three mechanisms that can allow people to persist when visible feedback disappears.",
-    "minutes": 4
-  },
-  "/choosing-problems-that-compound/": {
-    "summary": "How the problems you choose shape the trust you earn and the responsibility that follows.",
-    "minutes": 3
-  },
-  "/the-logic-most-advice-skips/": {
-    "summary": "Necessary, sufficient, or helpful: the distinctions that make a promise worth testing.",
-    "minutes": 1
-  }
-}
-;
       const heading=$('h1',main)||make('h1','','Writing');heading.textContent='Writing';
       const intro=make('header','writing-intro');intro.append(heading,make('p','','Essays on mental models and systems thinking.'));main.prepend(intro);
       const rows=$$('li',list).filter(row=>$('a',row));
