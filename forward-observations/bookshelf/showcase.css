@@ -24,6 +24,8 @@
 .library-showcase .library-book{height:calc(var(--cover-height) + 8px);min-width:0;perspective:1000px;outline-offset:8px}
 .library-showcase .library-book .library-volume.is-face{height:var(--cover-height);width:auto;aspect-ratio:var(--cover-ratio,.7);transform:rotateY(-10deg);transform-origin:50% 90%;transition:transform 380ms cubic-bezier(.16,1,.3,1)}
 .library-showcase .library-front{box-shadow:inset 1px 0 #ffffff30,5px 10px 14px -4px #000a}
+.library-showcase .library-front img{opacity:0;transition:opacity 180ms ease}
+.library-showcase .is-cover-ready .library-front img{opacity:1}
 .library-showcase .library-front:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at var(--light-x,20%) var(--light-y,10%),#fff6,transparent 65%),linear-gradient(90deg,#0003,transparent 7%,#fff1 11%,transparent 16%);opacity:.12;transition:opacity 240ms ease}
 .library-showcase .library-book:after{width:88%;height:6px;max-width:180px;bottom:-1px;opacity:.8;background:#0009;filter:blur(4px);transition:opacity 240ms ease}
 .library-showcase .library-book-title{display:flex;flex-direction:column;gap:7px;top:calc(100% + 32px);left:-3px;right:-3px;overflow:visible;text-align:center;font:500 14px/1.4 var(--body);color:var(--text);-webkit-line-clamp:unset}

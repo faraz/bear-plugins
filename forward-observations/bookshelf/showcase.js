@@ -40,10 +40,14 @@
           if (author.textContent) caption.append(author);
           if (status) caption.append(status);
         }
-        if (book.clientWidth) narrowest = Math.min(narrowest, book.clientWidth);
-        if (caption) tallestCaption = Math.max(tallestCaption, caption.offsetHeight);
         const image = book.querySelector('img');
+        book.classList.toggle('is-cover-ready', !!image?.naturalWidth);
         if (image?.naturalHeight) ratio = Math.max(ratio, image.naturalWidth / image.naturalHeight);
+      }
+      // Finish all DOM writes before measuring the shared geometry.
+      for (const book of books) {
+        if (book.clientWidth) narrowest = Math.min(narrowest, book.clientWidth);
+        tallestCaption = Math.max(tallestCaption, book.querySelector('.library-book-title')?.offsetHeight || 0);
       }
       if (!Number.isFinite(narrowest)) return;
       const ceiling = innerWidth >= 1100 ? 224 : innerWidth >= 700 ? 200 : 148;
