@@ -3,11 +3,15 @@ on:
   pull_request:
     paths:
       - 'forward-observations/2026-10-07/**'
+      - 'forward-observations/bookshelf/**'
+      - 'forward-observations/edge-of-stability/writing-site.js'
       - '.github/workflows/bookshelf.yml'
   push:
     branches: ['main']
     paths:
       - 'forward-observations/2026-10-07/**'
+      - 'forward-observations/bookshelf/**'
+      - 'forward-observations/edge-of-stability/writing-site.js'
       - '.github/workflows/bookshelf.yml'
 permissions:
   contents: read
@@ -27,3 +31,4 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
+
