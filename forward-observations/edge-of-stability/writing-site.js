@@ -358,8 +358,8 @@
       document.body.classList.add('writing-index');
       const editorial={
   "/training-at-the-edge-of-stability/": {
-    "summary": "Interactive figures explain why oscillating gradient-descent updates can still make progress, and what the edge of stability can tell us about training.",
-    "minutes": 11
+    "summary": "Large training steps can trigger oscillations that also push the model toward lower curvature. Whether training keeps improving depends on that feedback.",
+    "minutes": 10
   },
   "/input-output-metrics-management/": {
     "summary": "Input metrics guide action, but their link to outcomes is a hypothesis. How to test that model, expose misleading targets, and know when to revise it.",
