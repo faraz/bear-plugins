@@ -17,9 +17,9 @@ function fixture({ archiveCount = 7, older = false, currentCount = 2 } = {}) {
       </a><p class="book-note"><a href="/notes/${id}">Read notes</a></p>
     </article>`;
   }
-  const current = [book('current-1', 'Distributed Systems', 'Fiodar Sazanavets'), book('current-2', 'AI Systems Performance Engineering', 'Chris Fregly')].slice(0, currentCount).join('');
+  const current = [book('current-1', 'Distributed Systems', 'Fiodar Sazanavets'), book('current-2', 'AI Systems Performance Engineering', 'Chris Fregly'), book('current-3', 'What Ultimately Is There?... And Other Foundational Questions', 'Stephen Wolfram')].slice(0, currentCount).join('');
   const archive = Array.from({ length: archiveCount }, (_, i) => book(`read-${i + 1}`, `Systems Volume ${i + 1}`, i === 6 ? 'François Chollet' : `Author ${i + 1}`)).join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bookshelf fixture</title><link rel="stylesheet" href="/theme.css"><script src="/site.js" defer></script></head>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bookshelf fixture</title><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/showcase.css"><script src="/site.js" defer></script><script src="/showcase.js" defer></script></head>
     <body><header><a class="title" href="/"><h1>forward observations</h1></a><nav></nav></header><main>
     <section class="bookshelf bookshelf-dimensional"><header class="shelf-intro"><h1>Bookshelf</h1><p>Books, notes, and ideas worth returning to.</p></header>
       <section class="shelf-year shelf-current"><h2>Currently reading</h2><div class="shelf-catalogue">${current}</div></section>
@@ -34,7 +34,9 @@ async function mount(page, { width = 1280, reducedMotion = 'reduce', query = '',
   await page.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.origin === origin && url.pathname === '/books/') return route.fulfill({ contentType: 'text/html', body: fixture(data) });
-    if (url.origin === origin && ['/theme.css', '/site.js'].includes(url.pathname)) return route.fulfill({ path: path.join(root, url.pathname.slice(1)) });
+    if (url.origin === origin && url.pathname === '/theme.css') return route.fulfill({ path: path.join(root, 'theme.css') });
+    if (url.origin === origin && url.pathname === '/site.js') return route.fulfill({ path: path.join(root, '../edge-of-stability/writing-site.js') });
+    if (url.origin === origin && ['/showcase.css', '/showcase.js'].includes(url.pathname)) return route.fulfill({ path: path.join(root, '../bookshelf', url.pathname.slice(1)) });
     // Decorative background modules are unrelated; no live requests or analytics.
     if (url.origin === origin && url.pathname === '/background.js') return route.fulfill({ contentType: 'text/javascript', body: '' });
     if (url.origin === origin && url.pathname.startsWith('/covers/')) {
@@ -235,4 +237,59 @@ test('the source bookshelf remains readable when enhancement is unavailable', as
   await expect(page.locator('.shelf-current')).toBeVisible();
   await expect(page.locator('.shelf-year[data-read-year="2026"]')).toBeVisible();
   await expect(page.locator('.shelf-book-link')).toHaveCount(9);
+});
+
+
+for (const width of [320, 390, 700, 1100, 1280, 1440]) {
+  test(`showcase covers share a scale and captions fit at ${width}px`, async ({ page }) => {
+    await mount(page, { width, currentCount: 3 });
+    await expect(page.locator('.library-showcase')).toBeVisible();
+    await expect(page.locator('.library-book-author')).toHaveCount(10);
+    await expect.poll(() => page.locator('.library-book .library-volume').evaluateAll(items => {
+      const heights = items.map(v => v.getBoundingClientRect().height);
+      return Math.max(...heights) - Math.min(...heights);
+    })).toBeLessThan(1);
+    const geometry = await page.locator('.library-row').evaluateAll(rows => rows.filter(r => r.getBoundingClientRect().width).map(row => {
+      const bottom = row.getBoundingClientRect().bottom;
+      return [...row.querySelectorAll('.library-book-title')].every(caption => caption.getBoundingClientRect().bottom <= bottom + 1);
+    }));
+    expect(geometry.every(Boolean)).toBe(true);
+    const cover = page.locator('.library-current .library-volume').first();
+    const height = await cover.evaluate(el => el.getBoundingClientRect().height);
+    await search(page).fill('Distributed');
+    await expect(page.locator('.library-book-author')).toHaveText('Fiodar Sazanavets');
+    await search(page).fill('');
+    await expect.poll(() => cover.evaluate(el => el.getBoundingClientRect().height)).toBeCloseTo(height, 0);
+  });
+}
+
+test('pointer tilt resets on leave and reduced motion and keeps captions steady', async ({ page }) => {
+  await mount(page, { reducedMotion: 'no-preference' });
+  const book = bookLink(page, 'current-1');
+  const caption = book.locator('.library-book-title');
+  const before = await caption.boundingBox();
+  await book.hover({ position: { x: 20, y: 30 } });
+  await expect(book).toHaveClass(/is-inspecting/);
+  await expect(book).not.toHaveCSS('--tilt-y', '');
+  expect((await caption.boundingBox()).y).toBeCloseTo(before.y, 1);
+  await page.mouse.move(2, 2);
+  await expect(book).not.toHaveClass(/is-inspecting/);
+  await book.hover();
+  await expect(book).toHaveClass(/is-inspecting/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(book).not.toHaveClass(/is-inspecting/);
+  await expect(book.locator('.library-volume')).toHaveCSS('transform', 'none');
+});
+
+test('failed covers retain legible fallback artwork and complete accessible names', async ({ page }) => {
+  await page.route('**/covers/current-1.svg', route => route.abort());
+  await mount(page, { width: 390 });
+  // Override after mount registration, then force the real error path.
+  await page.route('**/covers/current-1.svg', route => route.abort());
+  await page.reload();
+  const book = bookLink(page, 'current-1');
+  await expect(book.locator('img')).toHaveCount(0);
+  await expect(book.locator('.library-cover-type')).toContainText('Distributed Systems');
+  await expect(book).toHaveAccessibleName('Distributed Systems, Fiodar Sazanavets. Open book details');
+  await expect(book.locator('.library-book-author')).toHaveText('Fiodar Sazanavets');
 });
